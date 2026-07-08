@@ -1,0 +1,39 @@
+【クラス名】
+item
+
+【主担当者名】
+野村侑来
+
+【属性（変数）一覧】
+・hit
+・effect
+・scale
+　・x
+　・y
+・time
+
+【メソッド一覧】
+・hit
+　・get
+　・attacked
+・effect
+　・move_buff
+　・move_debuff
+　・attack
+　・defense
+
+【各属性，各メソッドの内容に関するメモ】
+・hit
+　アイテムとの当たり判定を管理する。
+　→getは自機がアイテムを入手するときの当たり判定
+　→attackedは敵がアイテムを当てられた際の判定
+・effect
+　アイテムによる様々な効果を管理する
+　・move_buff
+　→移動速度上昇、（身隠し）など
+　・move_debuff
+　→移動速度低下、移動不可など
+　・attack
+　→敵の消滅、（アイテム化）
+　・defense
+　→無敵、すり抜け等
