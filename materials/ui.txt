@@ -1,0 +1,85 @@
+UIクラス設計書
+
+○クラス名
+　
+　Ui
+
+○担当者
+　
+　梁瀬 結月
+
+○属性（変数）一覧
+　
+
+属性	型	内容
+
+time	int	残り時間
+score	int	現在のスコア
+treasureCount	int	回収した宝の数
+totalTreasure	int	宝の総数
+enemyCount	int	残っている敵の数
+itemList	ArrayList<Item>	所持アイテム一覧
+message	String	現在表示するメッセージ
+messageTimer	int	メッセージ表示時間
+gameState	int	ゲーム状態（プレイ中・クリア・ゲームオーバー）
+
+○メソッド
+
+
+メソッド	戻り値	内容
+drawStatus()	void	ステータスバーを表示
+drawMessage()	void	メッセージ欄を表示
+drawItems()	void	所持アイテムを表示
+showMessage(String msg)	void	メッセージを設定する
+updateMessage()	void	一定時間後にメッセージを消す
+drawGameClear()	void	ゲームクリア画面を表示
+drawGameOver()	void	ゲームオーバー画面を表示
+display()	void	UI全体を描画する
+
+
+○各メソッドのメモ
+
+①drawStatus()
+残り時間
+宝の数
+敵の数
+スコア
+アイテム数
+
+を画面上部に表示する。
+
+②drawMessage()
+ゲーム画面下に「敵を発見した！」「宝を入手した！」「スピードアップ！」などのメッセージを表示する。
+
+③showMessage(String msg)
+他のクラスからui.showMessage("宝を入手した！");のように呼び出し、表示するメッセージを変更する。
+
+④updateMessage()
+2～3秒経過したら、message = "";としてメッセージを消す。
+
+⑤drawItems()
+現在持っている
+
+スピードアップ、無敵、攻撃アイテムなどをアイコン付きで表示する。
+
+⑥drawGameClear()
+ゲームクリア画面を表示する。
+例：
+GAME CLEAR!　
+スコア：3250
+
+[次のステージ]
+
+[タイトルへ戻る]
+
+⑦drawGameOver()
+ゲームオーバー画面を表示する。
+例：
+GAME OVER
+
+スコア：1250
+
+[リトライ]
+
+[タイトルへ戻る]
+
