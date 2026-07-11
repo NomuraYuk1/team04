@@ -16,6 +16,7 @@ class UI {
   // 1: プレイ中
   // 2: ゲームクリア
   // 3: ゲームオーバー
+  // 4:オプション
   int gameState = 0;
 
   // ===== メイン表示 =====
@@ -24,6 +25,11 @@ class UI {
     // タイトル
     if (gameState == 0) {
       drawTitle();
+      return;
+    }
+
+    if (gameState == 4) {
+      drawOption();
       return;
     }
 
@@ -75,23 +81,45 @@ class UI {
   }
 
   // ===== メッセージ欄 =====
+  // ===== メッセージ欄 =====
   void drawMessage() {
 
+
+    // ゲーム画面との境界線
+    stroke(180);
+    strokeWeight(5);
+    line(0, height - 130, width, height - 130);
+
+    // メッセージエリア全体の背景
+    noStroke();
+    fill(70);
+    rect(0, height - 130, width, 130);
+
+    // メッセージボックス
+    stroke(170, 140, 90);
+    strokeWeight(3);
     fill(45);
-    stroke(120, 100, 60);
-    strokeWeight(4);
+    rect(20, height - 115, width - 40, 95, 15);
 
-    rect(150, height-120, 500, 100, 20);
-
-    fill(255);
-
+    // タイトル
+    fill(255, 220, 100);
     textAlign(LEFT, TOP);
+    textSize(18);
+    text("MESSAGE", 35, height - 108);
+
+    // メッセージ
+    fill(255);
+    textSize(22);
+
+    if (messageTimer > 0) {
+      text(message, 35, height - 75);
+      messageTimer--;
+    }
+
+    // ▼マーク
+    fill(0, 180, 255);
     textSize(24);
-
-    text(message, 170, height-95);
-
-    fill(0, 150, 255);
-    text("▼", 610, height-35);
+    text("▼", width - 50, height - 45);
   }
 
   // ===== メッセージ変更 =====
@@ -225,5 +253,30 @@ class UI {
     textAlign(CENTER, CENTER);
     textSize(22);
     text(label, x + w/2, y + h/2);
+  }
+
+  void drawOption() {
+
+    background(70);
+
+    textAlign(CENTER);
+
+    fill(255, 200, 80);
+    textSize(42);
+    text("OPTION", width/2, 90);
+
+    fill(255);
+    textSize(24);
+
+    text("BGM", width/2-120, 170);
+    text("ON", width/2+100, 170);
+
+    text("効果音", width/2-120, 230);
+    text("ON", width/2+100, 230);
+
+    text("難易度", width/2-120, 290);
+    text("NORMAL", width/2+100, 290);
+
+    drawButton(width/2-110, 420, 220, 55, "タイトルへ戻る");
   }
 }

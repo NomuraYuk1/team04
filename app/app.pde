@@ -69,9 +69,12 @@ void keyReleased() {
 
 void mousePressed() {
 
+  // ==========================
+  // タイトル画面
+  // ==========================
   if (ui.gameState == 0) {
 
-    // ゲーム開始ボタン
+    // ゲーム開始
     if (mouseX >= width/2-110 && mouseX <= width/2+110 &&
       mouseY >= 230 && mouseY <= 285) {
 
@@ -79,24 +82,38 @@ void mousePressed() {
       ui.showMessage("ゲームスタート！");
     }
 
-    // オプションボタン
-    if (mouseX >= width/2-110 && mouseX <= width/2+110 &&
+    // オプション
+    else if (mouseX >= width/2-110 && mouseX <= width/2+110 &&
       mouseY >= 305 && mouseY <= 360) {
 
-      println("オプション");
+      ui.gameState = 4;
     }
 
-    // ゲーム終了ボタン
-    if (mouseX >= width/2-110 && mouseX <= width/2+110 &&
+    // ゲーム終了
+    else if (mouseX >= width/2-110 && mouseX <= width/2+110 &&
       mouseY >= 380 && mouseY <= 435) {
 
-      println("ゲーム終了");
-      exit();   // ← プログラム終了
+      exit();
     }
   }
 
-  // ===== GAME OVER画面 =====
-  if (ui.gameState == 3) {
+  // ==========================
+  // オプション画面
+  // ==========================
+  else if (ui.gameState == 4) {
+
+    // タイトルへ戻る
+    if (mouseX >= width/2-110 && mouseX <= width/2+110 &&
+      mouseY >= 420 && mouseY <= 475) {
+
+      ui.gameState = 0;
+    }
+  }
+
+  // ==========================
+  // GAME OVER画面
+  // ==========================
+  else if (ui.gameState == 3) {
 
     // リトライ
     if (mouseX >= width/2-95 && mouseX <= width/2+95 &&
@@ -106,13 +123,27 @@ void mousePressed() {
     }
 
     // タイトルへ戻る
-    if (mouseX >= width/2-95 && mouseX <= width/2+95 &&
+    else if (mouseX >= width/2-95 && mouseX <= width/2+95 &&
       mouseY >= 340 && mouseY <= 395) {
 
       ui.gameState = 0;
     }
   }
+
+  // ==========================
+  // GAME CLEAR画面
+  // ==========================
+  else if (ui.gameState == 2) {
+
+    // タイトルへ戻る
+    if (mouseX >= width/2-95 && mouseX <= width/2+95 &&
+      mouseY >= 300 && mouseY <= 355) {
+
+      ui.gameState = 0;
+    }
+  }
 }
+
 
 void restartGame() {
 
