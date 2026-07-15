@@ -16,6 +16,7 @@ class InvincibilityZone {
   }
 
   boolean hitTest(Player p) {
-    return (p.x + p.r > x && p.x - p.r < x + w && p.y + p.r > y && p.y - p.r < y + h);
+    float pr = p.size / 2; // p.r の代わりに p.size の半分を使用
+    return (p.x + pr > x && p.x - pr < x + w && p.y + pr > y && p.y - pr < y + h);
   }
 }

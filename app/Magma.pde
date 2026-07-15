@@ -15,6 +15,6 @@ class Magma {
   }
 
   boolean hitTest(Player p) {
-    return (dist(p.x, p.y, x, y) < r + p.r);
+    return (dist(p.x, p.y, x, y) < r + (p.size / 2));
   }
 }

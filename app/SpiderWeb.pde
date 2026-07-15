@@ -23,6 +23,9 @@ class SpiderWeb {
   }
 
   boolean hitTest(Player p) {
-    return (p.x + p.r > x && p.x - p.r < x + w && p.y + p.r > y && p.y - p.r < y + h);
+    // プレイヤーの半径を計算
+    float pr = p.size / 2;
+    // 四角形（蜘蛛の巣）と円（プレイヤー）の当たり判定
+    return (p.x + pr > x && p.x - pr < x + w && p.y + pr > y && p.y - pr < y + h);
   }
 }

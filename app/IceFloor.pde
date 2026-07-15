@@ -14,7 +14,7 @@ class IceFloor {
     ellipse(x, y, r * 2, r * 2);
   }
 
-  boolean hitTest(Player p) {
-    return (dist(p.x, p.y, x, y) < r + p.r);
-  }
+ boolean hitTest(Player p) {
+  return (dist(p.x, p.y, x, y) < r + (p.size / 2)); 
+}
 }
