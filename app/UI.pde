@@ -155,7 +155,6 @@ class UI {
   void drawGameClear() {
 
     background(90);
-
     textAlign(CENTER, CENTER);
 
     fill(0, 255, 100);
@@ -166,8 +165,13 @@ class UI {
     textSize(28);
     text("スコア：" + score, width/2, 200);
 
-    drawGameOverButton(width/2-95, 300, 190, 55, "タイトルに戻る");
+    // ▼ リトライボタン追加
+    drawGameOverButton(width/2-95, 240, 190, 55, "リトライ");
+
+    // ▼ タイトルへ戻るボタン（既存）
+    drawGameOverButton(width/2-95, 320, 190, 55, "タイトルに戻る");
   }
+
 
   void drawGameOverButton(float x, float y, float w, float h, String label) {
 

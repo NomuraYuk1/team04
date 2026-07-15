@@ -24,7 +24,7 @@ void setup() {
   textFont(font);
 
   ui = new UI();
-  
+
   initMap();
   player = new Player(50, 50); // 元のPlayerクラスを使用
   enemy = new Enemy(400, 300); // 元のEnemyクラスを使用
@@ -131,8 +131,8 @@ void draw() {
     boolean hitWall = false;
     float pr = player.size / 2;
     for (Wall w : walls) {
-      if (player.x + pr > w.x && player.x - pr < w.x + w.w && 
-          player.y + pr > w.y && player.y - pr < w.y + w.h) {
+      if (player.x + pr > w.x && player.x - pr < w.x + w.w &&
+        player.y + pr > w.y && player.y - pr < w.y + w.h) {
         hitWall = true;
       }
     }
@@ -166,8 +166,8 @@ void draw() {
 
     // 無敵ゾーンとの当たり判定
     for (InvincibilityZone iz : invincZones) {
-      if (player.x + player.size/2 > iz.x && player.x - player.size/2 < iz.x + iz.w && 
-          player.y + player.size/2 > iz.y && player.y - player.size/2 < iz.y + iz.h) {
+      if (player.x + player.size/2 > iz.x && player.x - player.size/2 < iz.x + iz.w &&
+        player.y + player.size/2 > iz.y && player.y - player.size/2 < iz.y + iz.h) {
         isInvincible = true;
         invincTimer = millis();
       }
@@ -239,7 +239,18 @@ void mousePressed() {
       ui.gameState = 0;
     }
   } else if (ui.gameState == 2) {
-    if (mouseX >= width/2-95 && mouseX <= width/2+95 && mouseY >= 300 && mouseY <= 355) {
+
+    // ▼ リトライ
+    if (mouseX >= width/2-95 && mouseX <= width/2+95 &&
+      mouseY >= 240 && mouseY <= 295) {
+
+      restartGame();   // ← ゲーム再スタート
+    }
+
+    // ▼ タイトルへ戻る（既存）
+    else if (mouseX >= width/2-95 && mouseX <= width/2+95 &&
+      mouseY >= 320 && mouseY <= 375) {
+
       ui.gameState = 0;
     }
   }
