@@ -1,0 +1,267 @@
+クラス名: Player
+属性（変数）一覧:
+
+float x, y
+
+float size
+
+float r
+
+float baseSpeed
+
+float speed
+
+boolean up, down, left, right
+
+boolean isTrapped
+
+int webEscapeCount
+
+int hp
+
+boolean isInvincible
+
+int invincTimer
+
+メソッド一覧:
+
+void move(ArrayList<Wall> walls, ArrayList<Gate> gates)
+
+boolean checkCollision(float nextX, float nextY, Wall w)
+
+boolean checkGateCollision(float nextX, float nextY, Gate g)
+
+void checkTrap()
+
+void display()
+
+void setMove(int keyCode, boolean isPressed)
+
+各属性、各メソッドの内容に関するメモ:
+
+x, y: プレイヤーの現在位置を管理する中心座標。
+
+size: プレイヤーの描画サイズ（直径）。
+
+r: プレイヤーの当たり判定用の半径（sizeの半分）。
+
+baseSpeed: プレイヤーの基準となる移動速度。
+
+speed: 現在の移動速度。水たまりや氷の床などの地形効果で変動する。
+
+up, down, left, right: 各方向への移動キーが押されているかを判定するフラグ。
+
+isTrapped: 蜘蛛の巣に捕まって足止めされているかどうかを判定するフラグ。
+
+webEscapeCount: 蜘蛛の巣から脱出するためにスペースキーを押した回数のカウンター。
+
+hp: プレイヤーの体力値。マグマに触れると減少する。
+
+isInvincible: 無敵状態であるかを表すフラグ。
+
+invincTimer: 無敵状態が開始された時間を記録するタイマー変数。
+
+move(): 移動フラグに基づき、壁や閉じたゲートとの衝突判定および画面外に出ない制限（constrain）を行いつつ座標を更新する処理。
+
+checkCollision(): 移動先の座標が、指定された壁ブロックと重なっているかを判定する。
+
+checkGateCollision(): 移動先の座標が、指定されたゲートと重なっているかを判定する。
+
+checkTrap(): スペースキーの入力回数が一定以上に達した際に足止め状態を解除する処理。
+
+display(): プレイヤーを青色の円として描画する。無敵時は白色、HP0以下の時は暗い灰色になり、足止め時は周囲に赤いエフェクトを表示する。
+
+setMove(): キーボードが押された時・離された時に呼び出され、対応する方向の移動フラグ（up, down, left, right）を切り替える処理。
+
+クラス名: Wall
+属性（変数）一覧:
+
+float x, y
+
+float w, h
+
+メソッド一覧:
+
+void display()
+
+各属性、各メソッドの内容に関するメモ:
+
+x, y: 壁ブロックの左上隅の配置座標。
+
+w, h: 壁ブロックの横幅と縦幅。
+
+display(): 壁の範囲をグレーの四角形として画面に描画する処理。
+
+クラス名: Gate
+属性（変数）一覧:
+
+float x, y
+
+float w, h
+
+boolean Open
+
+int intervalTime
+
+int lastSwitchTime
+
+メソッド一覧:
+
+void update()
+
+void display()
+
+boolean Passable()
+
+各属性、各メソッドの内容に関するメモ:
+
+x, y: ゲートの左上隅の配置座標。
+
+w, h: ゲートの横幅と縦幅。
+
+Open: ゲートが開いている（通行可能）か、閉じている（通行不可）かを表すフラグ。
+
+intervalTime: 自動で開閉を切り替える時間間隔（ミリ秒）。
+
+lastSwitchTime: 最後に開閉状態が反転した時間を記録する変数。
+
+update(): 前回切り替わった時間からの経過時間をチェックし、intervalTimeを超えていればOpenの状態を反転させる処理。
+
+display(): 開閉状態に応じて、開いている時は半透明の緑色、閉じている時は赤色の四角形を描画する処理。
+
+Passable(): 現在このゲートが通行可能かどうかを外部に返す処理。
+
+クラス名: IceFloor
+属性（変数）一覧:
+
+float x, y
+
+float r
+
+float fastRate
+
+メソッド一覧:
+
+void display()
+
+boolean hitTest(Player p)
+
+各属性、各メソッドの内容に関するメモ:
+
+x, y: 氷の床の中心座標。
+
+r: 氷の床の半径（円形）。
+
+fastRate: プレイヤーの移動速度を上昇させる乗算倍率。
+
+display(): 氷の床の範囲を薄い青色の円として描画する処理。
+
+hitTest(): プレイヤーの中心との距離を計算し、接触しているかを判定する処理。
+
+クラス名: Magma
+属性（変数）一覧:
+
+float x, y
+
+float r
+
+int dmgVal
+
+メソッド一覧:
+
+void display()
+
+boolean hitTest(Player p)
+
+各属性、各メソッドの内容に関するメモ:
+
+x, y: マグマの中心座標。
+
+r: マグマの半径（円形）。
+
+dmgVal: 接触時にプレイヤーのHPから減算するダメージ量。
+
+display(): マグマの範囲を赤色の円として描画する処理。
+
+hitTest(): プレイヤーの中心との距離を計算し、接触しているかを判定する処理。
+
+クラス名: InvincibilityZone
+属性（変数）一覧:
+
+float x, y
+
+float w, h
+
+int timeLimit
+
+メソッド一覧:
+
+void display()
+
+boolean hitTest(Player p)
+
+各属性、各メソッドの内容に関するメモ:
+
+x, y: 無敵ゾーンの左上隅の配置座標。
+
+w, h: 無敵ゾーンの横幅と縦幅（四角形エリア）。
+
+timeLimit: 無敵効果の持続時間（ミリ秒）。
+
+display(): 無敵ゾーンの範囲を白色の四角形として描画する処理。
+
+hitTest(): プレイヤーの座標と半径を考慮して、この四角形エリア内に入ったかを判定する処理。
+
+クラス名: Puddle
+属性（変数）一覧:
+
+float x, y
+
+float w, h
+
+float slowRate
+
+メソッド一覧:
+
+void display()
+
+boolean hitTest(Player p)
+
+各属性、各メソッドの内容に関するメモ:
+
+x, y: 水たまりを配置する矩形の左上座標。
+
+w, h: 水たまりの横幅と縦幅。
+
+slowRate: プレイヤーの移動速度を低下させる乗算倍率。
+
+display(): 指定された濃い青色の楕円として描画する処理。
+
+hitTest(): プレイヤーの座標が水たまりの矩形領域内にあるかを判定する処理。
+
+クラス名: SpiderWeb
+属性（変数）一覧:
+
+float x, y
+
+float w, h
+
+int requiredTaps
+
+メソッド一覧:
+
+void display()
+
+boolean hitTest(Player p)
+
+各属性、各メソッドの内容に関するメモ:
+
+x, y: 蜘蛛の巣を配置する矩形の左上座標。
+
+w, h: 蜘蛛の巣の横幅と縦幅。
+
+requiredTaps: 足止め解除に必要なスペースキーの連打回数。
+
+display(): 白い線と円を組み合わせて蜘蛛の巣の模様を描画する処理。
+
+hitTest(): プレイヤーの座標と半径を考慮して、蜘蛛の巣の領域に接触したかを判定する処理。
