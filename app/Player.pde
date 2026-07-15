@@ -39,11 +39,3 @@ class Player {
     if (keyCode == RIGHT) right = isPressed;
   }
 }
-
-void keyPressed() {
-  player.setMove(keyCode, true);
-}
-
-void keyReleased() {
-  player.setMove(keyCode, false);
-}
