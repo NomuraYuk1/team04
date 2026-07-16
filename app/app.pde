@@ -2,7 +2,19 @@ Player player; // プレイヤー
 Enemy enemy;   // 敵
 UI ui;         // UI
 
+import processing.sound.*;
+SoundFile startSound;
+SoundFile getSound;
+SoundFile clearSound;
+SoundFile gameOverSound;
+
+
+
 PFont font;
+
+final int MAP_HEIGHT = 520;
+final int STATUS_HEIGHT = 70;
+final int MESSAGE_HEIGHT = 130;
 
 ArrayList<Wall> walls;
 ArrayList<Gate> gates;
@@ -17,7 +29,7 @@ boolean isInvincible = false;
 int invincTimer = 0;
 
 void setup() {
-  size(800, 600);
+  size(800, 720);
   frameRate(60);
 
   font = createFont("Yu Gothic", 20);
@@ -28,6 +40,11 @@ void setup() {
   initMap();
   player = new Player(50, 50); // 元のPlayerクラスを使用
   enemy = new Enemy(400, 300); // 元のEnemyクラスを使用
+
+  startSound = new SoundFile(this, "gamestart.mp3");
+  getSound = new SoundFile(this, "takara_get.mp3");
+  clearSound = new SoundFile(this, "clear.mp3");
+  gameOverSound = new SoundFile(this, "gameover.mp3");
 }
 
 void initMap() {
@@ -89,6 +106,18 @@ void initMap() {
 void draw() {
   background(15, 105, 135);
 
+  stroke(255);
+  strokeWeight(3);
+  noFill();
+  rect(0, 0, width, MAP_HEIGHT);
+
+  noStroke();
+
+  // マップとUIの境界線
+  stroke(180);
+  strokeWeight(3);
+  line(0, MAP_HEIGHT, width, MAP_HEIGHT);
+
   if (ui.gameState == 0) {
     ui.display();
     return;
@@ -147,9 +176,26 @@ void draw() {
       // アイテムの半径を10として当たり判定
       if (dist(player.x, player.y, item.x, item.y) < (player.size / 2) + 10) {
         items.remove(i); // リストから削除
+
+        getSound.play();
         ui.treasureCount++; // 宝の数を増やす
+        ui.score += 100;
+
         if (ui.treasureCount >= ui.totalTreasure) {
-          ui.gameState = 2; // 全て集めたらクリア
+          ui.score += 500;
+          ui.score += ui.time * 10;   // 残り時間ボーナス
+
+          clearSound.play();
+
+          ui.showMessage("すべての宝を集めた！");
+          ui.gameState = 2;
+        } else {
+
+          ui.showMessage("宝を入手！ (" +
+            ui.treasureCount +
+            "/" +
+            ui.totalTreasure +
+            ")");
         }
       }
     }
@@ -159,6 +205,11 @@ void draw() {
       if (dist(player.x, player.y, magma.x, magma.y) < (player.size / 2) + magma.r) {
         if (!isInvincible) {
           playerHp -= magma.dmgVal;
+          ui.score -= 20;
+
+          if (ui.score < 0) {
+            ui.score = 0;
+          }
           if (playerHp <= 0) ui.gameState = 3;
         }
       }
@@ -180,12 +231,15 @@ void draw() {
 
     enemy.move();
     if (enemy.hitPlayer(player) && !isInvincible) {
+
+      gameOverSound.play();
       ui.gameState = 3;
     }
   }
 
-  // プレイヤーの描画とエフェクト
+  // プレイヤー
   player.display();
+
   if (playerHp <= 0) {
     fill(50, 200);
     ellipse(player.x, player.y, player.size, player.size);
@@ -194,7 +248,10 @@ void draw() {
     ellipse(player.x, player.y, player.size, player.size);
   }
 
+  // 敵
   enemy.display();
+
+  // UIを描画
   ui.display();
 }
 
@@ -219,42 +276,145 @@ void keyReleased() {
 }
 
 void mousePressed() {
+
+  // タイトル画面
   if (ui.gameState == 0) {
-    if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 230 && mouseY <= 285) {
-      ui.gameState = 1;
-      ui.showMessage("ゲームスタート！");
-    } else if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 305 && mouseY <= 360) {
-      ui.gameState = 4;
-    } else if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 380 && mouseY <= 435) {
-      exit();
-    }
-  } else if (ui.gameState == 4) {
-    if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 420 && mouseY <= 475) {
-      ui.gameState = 0;
-    }
-  } else if (ui.gameState == 3) {
-    if (mouseX >= width/2-95 && mouseX <= width/2+95 && mouseY >= 260 && mouseY <= 315) {
+
+    // ゲーム開始
+    if (mouseX >= width/2-110 &&
+      mouseX <= width/2+110 &&
+      mouseY >= 230 &&
+      mouseY <= 285) {
+
       restartGame();
-    } else if (mouseX >= width/2-95 && mouseX <= width/2+95 && mouseY >= 340 && mouseY <= 395) {
-      ui.gameState = 0;
-    }
-  } else if (ui.gameState == 2) {
-
-    // ▼ リトライ
-    if (mouseX >= width/2-95 && mouseX <= width/2+95 &&
-      mouseY >= 240 && mouseY <= 295) {
-
-      restartGame();   // ← ゲーム再スタート
+      startSound.play();
+      ui.showMessage("ゲームスタート！");
     }
 
-    // ▼ タイトルへ戻る（既存）
-    else if (mouseX >= width/2-95 && mouseX <= width/2+95 &&
-      mouseY >= 320 && mouseY <= 375) {
+    // オプション
+    else if (mouseX >= width/2-110 &&
+      mouseX <= width/2+110 &&
+      mouseY >= 305 &&
+      mouseY <= 360) {
+
+      ui.gameState = 4;
+    }
+
+    // 終了
+    else if (mouseX >= width/2-110 &&
+      mouseX <= width/2+110 &&
+      mouseY >= 380 &&
+      mouseY <= 435) {
+
+      System.exit(0);
+    }
+  }
+
+  // オプション画面
+  else if (ui.gameState == 4) {
+
+    // 難易度
+    if (mouseX>=width/2+20 &&
+      mouseX<=width/2+180 &&
+      mouseY>=150 &&
+      mouseY<=185) {
+
+      ui.difficulty++;
+
+      if (ui.difficulty>1) {
+        ui.difficulty=0;
+      }
+    }
+
+    // 操作説明
+    if (mouseX>=width/2-110 &&
+      mouseX<=width/2+110 &&
+      mouseY>=240 &&
+      mouseY<=295) {
+
+      ui.gameState=5;
+    }
+
+    // ゲーム説明
+    if (mouseX>=width/2-110 &&
+      mouseX<=width/2+110 &&
+      mouseY>=320 &&
+      mouseY<=375) {
+
+      ui.gameState=6;
+    }
+
+    // タイトルへ戻る
+    if (mouseX>=width/2-110 &&
+      mouseX<=width/2+110 &&
+      mouseY>=420 &&
+      mouseY<=475) {
+
+      ui.gameState=0;
+    }
+  }
+
+  // GAME OVER
+  else if (ui.gameState == 3) {
+
+    if (mouseX >= width/2-95 &&
+      mouseX <= width/2+95 &&
+      mouseY >= 260 &&
+      mouseY <= 315) {
+
+      restartGame();
+      startSound.play();
+    } else if (mouseX >= width/2-95 &&
+      mouseX <= width/2+95 &&
+      mouseY >= 340 &&
+      mouseY <= 395) {
 
       ui.gameState = 0;
     }
   }
+
+  // GAME CLEAR
+  else if (ui.gameState == 2) {
+
+    // リトライ
+    if (mouseX >= width/2-95 &&
+      mouseX <= width/2+95 &&
+      mouseY >= 240 &&
+      mouseY <= 295) {
+
+      restartGame();
+      startSound.play();
+    }
+
+    // タイトルへ戻る
+    else if (mouseX >= width/2-95 &&
+      mouseX <= width/2+95 &&
+      mouseY >= 320 &&
+      mouseY <= width/2+375) {
+
+      ui.gameState = 0;
+    }
+  } else if (ui.gameState == 5) {
+
+    if (mouseX >= width/2-110 &&
+      mouseX <= width/2+110 &&
+      mouseY >= 450 &&
+      mouseY <= 505) {
+
+      ui.gameState = 4;
+    }
+  } else if (ui.gameState == 6) {
+
+    if (mouseX >= width/2-110 &&
+      mouseX <= width/2+110 &&
+      mouseY >= 450 &&
+      mouseY <= 505) {
+
+      ui.gameState = 4;
+    }
+  }
 }
+
 
 void restartGame() {
   initMap();

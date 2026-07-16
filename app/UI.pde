@@ -16,8 +16,15 @@ class UI {
   // 1: プレイ中
   // 2: ゲームクリア
   // 3: ゲームオーバー
-  // 4:オプション
+  // 4: オプション
+  // 5: 操作説明
+  // 6: ゲーム説明
   int gameState = 0;
+
+  // 難易度
+  int difficulty = 0;
+  // 0 = NORMAL
+  // 1 = HARD
 
   // ===== メイン表示 =====
   void display() {
@@ -30,6 +37,16 @@ class UI {
 
     if (gameState == 4) {
       drawOption();
+      return;
+    }
+
+    if (gameState == 5) {
+      drawHowToPlay();
+      return;
+    }
+
+    if (gameState == 6) {
+      drawGameGuide();
       return;
     }
 
@@ -53,75 +70,73 @@ class UI {
   // ===== ステータスバー =====
   void drawStatus() {
 
+    int y = MAP_HEIGHT;
+
     fill(0);
-    rect(0, 0, width, 70, 15);
+    noStroke();
+    rect(0, y, width, STATUS_HEIGHT);
 
     fill(255);
     textAlign(CENTER);
 
     textSize(15);
 
-    text("敵の数", 70, 20);
-    text("宝の数", 180, 20);
-    text("残り時間", 330, 20);
-    text("スコア", 470, 20);
-    text("アイテム", 650, 20);
+    text("敵の数", 70, y+20);
+    text("宝の数", 180, y+20);
+    text("残り時間", 330, y+20);
+    text("スコア", 470, y+20);
+    text("アイテム", 650, y+20);
 
     textSize(30);
 
-    text(enemyCount, 70, 55);
-    text(treasureCount + "/" + totalTreasure, 180, 55);
+    text(enemyCount, 70, y+55);
+    text(treasureCount+"/"+totalTreasure, 180, y+55);
 
-    String t = nf(time/60, 2)+":"+nf(time%60, 2);
-    text(t, 330, 55);
+    String t=nf(time/60, 2)+":"+nf(time%60, 2);
+    text(t, 330, y+55);
 
-    text(score, 470, 55);
+    text(score, 470, y+55);
 
-    text("なし", 650, 55);
+    text("なし", 650, y+55);
   }
 
   // ===== メッセージ欄 =====
-  // ===== メッセージ欄 =====
   void drawMessage() {
 
+    int y = MAP_HEIGHT + STATUS_HEIGHT;
 
-    // ゲーム画面との境界線
     stroke(180);
-    strokeWeight(5);
-    line(0, height - 130, width, height - 130);
+    strokeWeight(4);
+    line(0, y, width, y);
 
-    // メッセージエリア全体の背景
     noStroke();
-    fill(70);
-    rect(0, height - 130, width, 130);
 
-    // メッセージボックス
+    fill(70);
+    rect(0, y, width, MESSAGE_HEIGHT);
+
     stroke(170, 140, 90);
     strokeWeight(3);
-    fill(45);
-    rect(20, height - 115, width - 40, 95, 15);
 
-    // タイトル
+    fill(45);
+    rect(20, y + 15, width - 40, MESSAGE_HEIGHT - 35, 15);
+
     fill(255, 220, 100);
     textAlign(LEFT, TOP);
     textSize(18);
-    text("MESSAGE", 35, height - 108);
+    text("MESSAGE", 35, y + 22);
 
-    // メッセージ
     fill(255);
     textSize(22);
 
     if (messageTimer > 0) {
-      text(message, 35, height - 75);
+      text(message, 35, y + 55);
       messageTimer--;
     }
 
-    // ▼マーク
     fill(0, 180, 255);
     textSize(24);
-    text("▼", width - 50, height - 45);
+    text("▼", width - 50, y + MESSAGE_HEIGHT - 25);
   }
-
   // ===== メッセージ変更 =====
   void showMessage(String msg) {
     message = msg;
@@ -272,15 +287,69 @@ class UI {
     fill(255);
     textSize(24);
 
-    text("BGM", width/2-120, 170);
-    text("ON", width/2+100, 170);
+    fill(255);
+    textSize(24);
 
-    text("効果音", width/2-120, 230);
-    text("ON", width/2+100, 230);
+    text("難易度", width/2-120, 170);
 
-    text("難易度", width/2-120, 290);
-    text("NORMAL", width/2+100, 290);
+    if (difficulty==0) {
+      text("◀ NORMAL ▶", width/2+90, 170);
+    } else {
+      text("◀ HARD ▶", width/2+90, 170);
+    }
+
+    drawButton(width/2-110, 240, 220, 55, "操作説明");
+
+    drawButton(width/2-110, 320, 220, 55, "ゲーム説明");
 
     drawButton(width/2-110, 420, 220, 55, "タイトルへ戻る");
+  }
+
+
+  void drawHowToPlay() {
+
+    background(70);
+
+    fill(255, 200, 80);
+    textAlign(CENTER);
+    textSize(40);
+    text("操作説明", width/2, 80);
+
+    fill(255);
+    textAlign(LEFT);
+
+    textSize(24);
+    text("Enterでもゲームスタートできる！", 120, 120);
+    text("↑ ↓ ← → ：移動", 120, 170);
+    text("宝を全部集めるとクリア", 120, 220);
+    text("敵に当たるとゲームオーバー", 120, 270);
+
+    drawButton(width/2-110, 450, 220, 55, "戻る");
+  }
+
+  void drawGameGuide() {
+
+    background(70);
+
+    fill(255, 200, 80);
+    textAlign(CENTER);
+    textSize(40);
+    text("ゲーム説明", width/2, 80);
+
+    fill(255);
+    textAlign(LEFT);
+
+    textSize(22);
+
+    text("制限時間内に宝を全て集めよう！", 100, 170);
+    text("赤い敵に当たるとゲームオーバー", 100, 220);
+    text("白：無敵エリア　青：氷エリア　黄色：宝", 100, 270);
+    text("宝1個：＋100点　クリア：＋500点", 100, 320);
+    text("残り時間1秒：＋10点　マグマ：＋20点", 100, 370 );
+
+
+
+
+    drawButton(width/2-110, 450, 220, 55, "戻る");
   }
 }

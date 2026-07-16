@@ -14,12 +14,14 @@ class Enemy {
   }
 
   void move() {
+
     x += speed * direction;
 
-    // 左右に巡回する
     if (x > 700 || x < 100) {
       direction *= -1;
     }
+
+    y = constrain(y, size/2, MAP_HEIGHT-size/2);
   }
 
   void display() {

@@ -24,7 +24,7 @@ class Player {
 
     // 画面外に出ないようにする
     x = constrain(x, size / 2, width - size / 2);
-    y = constrain(y, size / 2, height - size / 2);
+    y = constrain(y, size/2, MAP_HEIGHT-size/2);
   }
 
   void display() {
