@@ -1,5 +1,5 @@
 Player player;
-Enemy enemy;
+ArrayList<Enemy> enemies;
 UI ui;
 
 import processing.sound.*;
@@ -52,12 +52,85 @@ void setup() {
     player = new Player(40, 40);
   }
 
-  enemy = new Enemy(400, 300);
+  initEnemies();
 
   startSound = new SoundFile(this, "gamestart.mp3");
   getSound = new SoundFile(this, "takara_get.mp3");
   clearSound = new SoundFile(this, "clear.mp3");
   gameOverSound = new SoundFile(this, "gameover.mp3");
+}
+
+void initEnemies() {
+  enemies = new ArrayList<Enemy>();
+
+  if (ui.difficulty == 0) {
+    // ==============================
+    // NORMAL：敵2体
+    // ==============================
+
+    // ゆっくり追尾型
+    enemies.add(
+      new Enemy(
+        700, 450,
+        1,
+        1.7
+      )
+    );
+
+    // 巡回 → 近づいたら追尾
+    Enemy nearChaseEnemy = new Enemy(
+      400, 300,
+      2,
+      2.4
+    );
+
+    nearChaseEnemy.chaseRange = 200;
+    enemies.add(nearChaseEnemy);
+
+  } else {
+    // ==============================
+    // HARD：敵4体
+    // ==============================
+
+    // 遅いランダム型
+    enemies.add(
+      new Enemy(
+        700, 450,
+        0,
+        1.8
+      )
+    );
+
+    // 速いランダム型
+    enemies.add(
+      new Enemy(
+        400, 150,
+        0,
+        3.2
+      )
+    );
+
+    // 常時追尾型
+    enemies.add(
+      new Enemy(
+        700, 250,
+        1,
+        2.5
+      )
+    );
+
+    // 巡回 → 近づいたら追尾
+    Enemy hardNearChaseEnemy = new Enemy(
+      300, 350,
+      2,
+      2.2
+    );
+
+    hardNearChaseEnemy.chaseRange = 180;
+    enemies.add(hardNearChaseEnemy);
+  }
+
+  ui.enemyCount = enemies.size();
 }
 
 void initMap() {
@@ -387,19 +460,25 @@ void draw() {
       }
     }
 
-    enemy.move();
+    for (Enemy enemy : enemies) {
+  enemy.move(player);
 
-    if (enemy.hitPlayer(player) && !isInvincible) {
-      if (barrier > 0){
-        barrier--;
-        ui.showMessage("バリアで防いだ！");
-        isInvincible = true;
-        invincTimer = millis();
-      }else{
-        gameOverSound.play();
-        ui.gameState = 3;
-      }
+  if (enemy.hitPlayer(player) && !isInvincible) {
+    if (barrier > 0) {
+      barrier--;
+
+      ui.showMessage("バリアで防いだ！");
+
+      isInvincible = true;
+      invincTimer = millis();
+
+    } else {
+      gameOverSound.play();
+      ui.gameState = 3;
+      break;
     }
+  }
+}
   }
 
   player.display();
@@ -415,7 +494,9 @@ void draw() {
     ellipse(player.x, player.y, player.size + 10, player.size + 10);
   }
 
+  for (Enemy enemy : enemies) {
   enemy.display();
+}
 
   ui.display();
 }
@@ -544,7 +625,7 @@ void mousePressed() {
 }
 
 void restartGame() {
-  initMap(); 
+  initMap();
 
   if (ui.difficulty == 0) {
     player = new Player(50, 50);
@@ -552,17 +633,35 @@ void restartGame() {
     player = new Player(40, 40);
   }
 
-  enemy = new Enemy(400, 300);
+  // 選択された難易度に合わせて敵を作り直す
+  initEnemies();
+
   ui.gameState = 1;
+
   playerHp = 100;
   isInvincible = false;
   invincTimer = 0;
+
   barrier = 0;
   speedEffect = 1.0;
+
   isTrapped = false;
   webEscapeCount = 0;
 
   ui.time = 120;
   ui.score = 0;
   ui.treasureCount = 0;
+  ui.frameCounter = 0;
+}
+
+void updateEnemyCount() {
+  int count = 0;
+
+  for (Enemy enemy : enemies) {
+    if (enemy.alive) {
+      count++;
+    }
+  }
+
+  ui.enemyCount = count;
 }

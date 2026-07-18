@@ -1,12 +1,27 @@
 class Attack extends Item {
-  
-  Attack(){
+
+  Attack() {
     super();
   }
-  
-  void effect(){
-    enemy.x = -1000;
-    enemy.y = -1000;
-    ui.showMessage("敵を撃退した！");
+
+  void effect() {
+    boolean defeated = false;
+
+    // 生きている敵を1体だけ倒す
+    for (Enemy enemy : enemies) {
+      if (enemy.alive) {
+        enemy.defeat();
+        defeated = true;
+        break;
+      }
+    }
+
+    updateEnemyCount();
+
+    if (defeated) {
+      ui.showMessage("敵を1体撃退した！");
+    } else {
+      ui.showMessage("敵はもういない！");
+    }
   }
 }
