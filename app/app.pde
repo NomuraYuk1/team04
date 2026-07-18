@@ -22,6 +22,9 @@ ArrayList<IceFloor> ices;
 ArrayList<Magma> magmas;
 ArrayList<InvincibilityZone> invincZones;
 ArrayList<Item> items; // アイテム（宝）のリスト
+ArrayList<Item> effectItems;//Attack等のアイテムリスト
+int barrier = 0;
+float speedEffect = 1.0;
 
 // Playerクラスを書き換えないため、HPや無敵状態はメイン側で管理
 int playerHp = 100;
@@ -101,6 +104,29 @@ void initMap() {
   }
   ui.totalTreasure = items.size();
   ui.treasureCount = 0;
+  
+  //効果アイテムの配置
+  effectItems = new ArrayList<Item>();
+  //攻撃アイテム
+  Attack a = new Attack();
+  a.x = 650;
+  a.y = 400;
+  effectItems.add(a);
+  //防御アイテム
+  Defense d = new Defense();
+  d.x = 500;
+  d.y = 450;
+  effectItems.add(d);
+  //移動速度上昇アイテム
+  Move_buff mb = new Move_buff();
+  mb.x = 50;
+  mb.y = 400;
+  effectItems.add(mb);
+  //移動速度低下アイテム
+  Move_debuff md = new Move_debuff();
+  md.x = 700;
+  md.y = 100;
+  effectItems.add(md);
 }
 
 void draw() {
@@ -139,9 +165,15 @@ void draw() {
     fill(255, 215, 0); // 金色
     ellipse(item.x, item.y, 20, 20); // サイズ20の円として描画
   }
+  
+  for (int i = 0; i < effectItems.size(); i++) {
+    Item ei = effectItems.get(i);
+    ei.display();
+  }
 
   if (ui.gameState == 1) { // プレイ中の処理
     player.speed = 4; // 基本速度リセット
+    player.speed *= speedEffect; //速度上昇の適用
 
     // 氷の床との当たり判定
     for (IceFloor ice : ices) {
@@ -199,6 +231,15 @@ void draw() {
         }
       }
     }
+    
+    //効果アイテムの当たり判定・効果発動
+    for (int i = effectItems.size() - 1; i >= 0; i--){
+      Item ei = effectItems.get(i);
+      if (ei.hit()){
+        ei.effect();//サブクラス（攻撃や防御）ごとの効果が呼ばれる。
+        effectItems.remove(i);//効果を発動したアイテムの除去
+      }
+    }
 
     // マグマとの当たり判定
     for (Magma magma : magmas) {
@@ -231,9 +272,16 @@ void draw() {
 
     enemy.move();
     if (enemy.hitPlayer(player) && !isInvincible) {
-
-      gameOverSound.play();
-      ui.gameState = 3;
+      //敵との接触時にバリアを消費して防ぐ処理
+      if (barrier > 0){
+        barrier--;
+        ui.showMessage("バリアで防いだ！");
+        isInvincible = true;      // 一時的に無敵化
+        invincTimer = millis();   // 無敵開始時刻を記録
+      }else{
+        gameOverSound.play();
+        ui.gameState = 3;
+      }
     }
   }
 
@@ -425,4 +473,6 @@ void restartGame() {
   playerHp = 100;
   isInvincible = false;
   invincTimer = 0;
+  barrier = 0;
+  speedEffect = 1.0;
 }

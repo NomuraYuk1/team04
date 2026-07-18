@@ -5,6 +5,7 @@ class Move_buff extends Item {
   }
   
   void effect(){
-    player.speed *= 1.1;
+    speedEffect *= 1.1;
+    ui.showMessage("スピードアップ！");
   }
 }

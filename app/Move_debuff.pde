@@ -5,6 +5,7 @@ class Move_debuff extends Item {
   }  
   
   void effect(){
-    player.speed *= 0.9;
+    enemy.speed *= 0.75;
+    ui.showMessage("敵のスピードを低下！");
   }
 }

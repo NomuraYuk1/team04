@@ -1,5 +1,4 @@
 class Defense extends Item {
-  int barrier = 0;
   
   Defense(){
     super();
@@ -7,5 +6,6 @@ class Defense extends Item {
   
   void effect(){
     barrier++;
+    ui.showMessage("バリアを獲得！");
   }
 }

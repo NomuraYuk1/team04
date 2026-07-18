@@ -11,7 +11,7 @@ class Item {
   }
   
   void display(){
-    rect(x, y, 20, 20);
+    rect(x, y, w, h);
   }
   
   boolean hit() {
