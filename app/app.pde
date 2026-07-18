@@ -1,14 +1,12 @@
-Player player; // プレイヤー
-Enemy enemy;   // 敵
-UI ui;         // UI
+Player player;
+Enemy enemy;
+UI ui;
 
 import processing.sound.*;
 SoundFile startSound;
 SoundFile getSound;
 SoundFile clearSound;
 SoundFile gameOverSound;
-
-
 
 PFont font;
 
@@ -21,12 +19,11 @@ ArrayList<Gate> gates;
 ArrayList<IceFloor> ices;
 ArrayList<Magma> magmas;
 ArrayList<InvincibilityZone> invincZones;
-ArrayList<Item> items; // アイテム（宝）のリスト
-ArrayList<Item> effectItems;//Attack等のアイテムリスト
+ArrayList<Item> items;
+ArrayList<Item> effectItems;
 int barrier = 0;
 float speedEffect = 1.0;
 
-// Playerクラスを書き換えないため、HPや無敵状態はメイン側で管理
 int playerHp = 100;
 boolean isInvincible = false;
 int invincTimer = 0;
@@ -41,8 +38,8 @@ void setup() {
   ui = new UI();
 
   initMap();
-  player = new Player(50, 50); // 元のPlayerクラスを使用
-  enemy = new Enemy(400, 300); // 元のEnemyクラスを使用
+  player = new Player(50, 50);
+  enemy = new Enemy(400, 300);
 
   startSound = new SoundFile(this, "gamestart.mp3");
   getSound = new SoundFile(this, "takara_get.mp3");
@@ -54,7 +51,6 @@ void initMap() {
   walls = new ArrayList<Wall>();
   gates = new ArrayList<Gate>();
 
-  // 壁の配置
   walls.add(new Wall(180, 50, 40, 80));
   walls.add(new Wall(220, 90, 40, 40));
   walls.add(new Wall(450, 50, 40, 80));
@@ -72,28 +68,37 @@ void initMap() {
   walls.add(new Wall(200, 300, 40, 80));
   walls.add(new Wall(240, 340, 40, 40));
   walls.add(new Wall(380, 350, 100, 50));
-  walls.add(new Wall(560, 320, 40, 80));
-  walls.add(new Wall(600, 320, 40, 40));
+  walls.add(new Wall(560, 360, 40, 80));
+  walls.add(new Wall(600, 360, 40, 40));
+  walls.add(new Wall(200, 420, 40, 60));
+  walls.add(new Wall(280, 460, 80, 40));
+  walls.add(new Wall(760, 400, 40, 100));
+  walls.add(new Wall(330, 20, 40, 30));  
+  walls.add(new Wall(0, 130, 30, 60)); 
+  walls.add(new Wall(80, 360, 40, 40));  
+  walls.add(new Wall(760, 180, 40, 50)); 
+  walls.add(new Wall(540, 60, 40, 40));  
+  walls.add(new Wall(760, 300, 40, 40));
 
-  // 氷の床の配置
   ices = new ArrayList<IceFloor>();
   ices.add(new IceFloor(350, 100, 30, 1.5));
   ices.add(new IceFloor(560, 250, 30, 1.5));
   ices.add(new IceFloor(340, 330, 30, 1.5));
+  ices.add(new IceFloor(420, 450, 30, 1.5));
 
-  // マグマの配置
   magmas = new ArrayList<Magma>();
   magmas.add(new Magma(120, 100, 30, 1));
   magmas.add(new Magma(230, 230, 30, 1));
   magmas.add(new Magma(550, 140, 30, 1));
+  magmas.add(new Magma(100, 480, 30, 1));
+  magmas.add(new Magma(300, 400, 20, 1));
 
-  // 無敵ゾーンの配置
   invincZones = new ArrayList<InvincibilityZone>();
   invincZones.add(new InvincibilityZone(720, 20, 60, 5000));
   invincZones.add(new InvincibilityZone(20, 250, 60, 5000));
   invincZones.add(new InvincibilityZone(420, 140, 60, 5000));
+  invincZones.add(new InvincibilityZone(600, 450, 50, 5000));
 
-  // ★ Itemクラスを変更せずに、インスタンス化してから座標を上書きして配置する
   items = new ArrayList<Item>();
   int[][] itemCoords = {{100, 100}, {500, 100}, {150, 450}, {700, 450}, {400, 250}};
   for (int i = 0; i < itemCoords.length; i++) {
@@ -105,24 +110,19 @@ void initMap() {
   ui.totalTreasure = items.size();
   ui.treasureCount = 0;
   
-  //効果アイテムの配置
   effectItems = new ArrayList<Item>();
-  //攻撃アイテム
   Attack a = new Attack();
   a.x = 650;
   a.y = 400;
   effectItems.add(a);
-  //防御アイテム
   Defense d = new Defense();
   d.x = 500;
   d.y = 450;
   effectItems.add(d);
-  //移動速度上昇アイテム
   Move_buff mb = new Move_buff();
   mb.x = 50;
   mb.y = 400;
   effectItems.add(mb);
-  //移動速度低下アイテム
   Move_debuff md = new Move_debuff();
   md.x = 700;
   md.y = 100;
@@ -139,7 +139,6 @@ void draw() {
 
   noStroke();
 
-  // マップとUIの境界線
   stroke(180);
   strokeWeight(3);
   line(0, MAP_HEIGHT, width, MAP_HEIGHT);
@@ -149,7 +148,6 @@ void draw() {
     return;
   }
 
-  // 壁・各ギミックの描画処理
   for (Wall w : walls) {
     fill(230, 80, 230);
     stroke(100, 0, 100);
@@ -160,10 +158,9 @@ void draw() {
   for (Magma magma : magmas) magma.display();
   for (InvincibilityZone iz : invincZones) iz.display();
 
-  // ★ メインプログラム側でアイテムを金色で描画
   for (Item item : items) {
-    fill(255, 215, 0); // 金色
-    ellipse(item.x, item.y, 20, 20); // サイズ20の円として描画
+    fill(255, 215, 0);
+    ellipse(item.x, item.y, 20, 20);
   }
   
   for (int i = 0; i < effectItems.size(); i++) {
@@ -171,24 +168,21 @@ void draw() {
     ei.display();
   }
 
-  if (ui.gameState == 1) { // プレイ中の処理
-    player.speed = 4; // 基本速度リセット
-    player.speed *= speedEffect; //速度上昇の適用
+  if (ui.gameState == 1) {
+    player.speed = 4;
+    player.speed *= speedEffect;
 
-    // 氷の床との当たり判定
     for (IceFloor ice : ices) {
       if (dist(player.x, player.y, ice.x, ice.y) < (player.size / 2) + ice.r) {
         player.speed *= ice.fastRate;
       }
     }
 
-    // 移動前の座標を記録
     float prevX = player.x;
     float prevY = player.y;
 
-    player.move(); // 元のPlayerクラスの移動実行
+    player.move();
 
-    // 壁との当たり判定（食い込んだら元の位置に戻す）
     boolean hitWall = false;
     float pr = player.size / 2;
     for (Wall w : walls) {
@@ -202,20 +196,18 @@ void draw() {
       player.y = prevY;
     }
 
-    // ★ アイテムとの当たり判定（取得したアイテムはリストから削除する）
     for (int i = items.size() - 1; i >= 0; i--) {
       Item item = items.get(i);
-      // アイテムの半径を10として当たり判定
       if (dist(player.x, player.y, item.x, item.y) < (player.size / 2) + 10) {
-        items.remove(i); // リストから削除
+        items.remove(i);
 
         getSound.play();
-        ui.treasureCount++; // 宝の数を増やす
+        ui.treasureCount++;
         ui.score += 100;
 
         if (ui.treasureCount >= ui.totalTreasure) {
           ui.score += 500;
-          ui.score += ui.time * 10;   // 残り時間ボーナス
+          ui.score += ui.time * 10;
 
           clearSound.play();
 
@@ -232,16 +224,14 @@ void draw() {
       }
     }
     
-    //効果アイテムの当たり判定・効果発動
     for (int i = effectItems.size() - 1; i >= 0; i--){
       Item ei = effectItems.get(i);
       if (ei.hit()){
-        ei.effect();//サブクラス（攻撃や防御）ごとの効果が呼ばれる。
-        effectItems.remove(i);//効果を発動したアイテムの除去
+        ei.effect();
+        effectItems.remove(i);
       }
     }
 
-    // マグマとの当たり判定
     for (Magma magma : magmas) {
       if (dist(player.x, player.y, magma.x, magma.y) < (player.size / 2) + magma.r) {
         if (!isInvincible) {
@@ -256,7 +246,6 @@ void draw() {
       }
     }
 
-    // 無敵ゾーンとの当たり判定
     for (InvincibilityZone iz : invincZones) {
       if (player.x + player.size/2 > iz.x && player.x - player.size/2 < iz.x + iz.w &&
         player.y + player.size/2 > iz.y && player.y - player.size/2 < iz.y + iz.h) {
@@ -265,19 +254,17 @@ void draw() {
       }
     }
 
-    // 制限時間経過による無敵状態の解除
     if (isInvincible && millis() - invincTimer > invincZones.get(0).timeLimit) {
       isInvincible = false;
     }
 
     enemy.move();
     if (enemy.hitPlayer(player) && !isInvincible) {
-      //敵との接触時にバリアを消費して防ぐ処理
       if (barrier > 0){
         barrier--;
         ui.showMessage("バリアで防いだ！");
-        isInvincible = true;      // 一時的に無敵化
-        invincTimer = millis();   // 無敵開始時刻を記録
+        isInvincible = true;
+        invincTimer = millis();
       }else{
         gameOverSound.play();
         ui.gameState = 3;
@@ -285,7 +272,6 @@ void draw() {
     }
   }
 
-  // プレイヤー
   player.display();
 
   if (playerHp <= 0) {
@@ -296,10 +282,8 @@ void draw() {
     ellipse(player.x, player.y, player.size, player.size);
   }
 
-  // 敵
   enemy.display();
 
-  // UIを描画
   ui.display();
 }
 
@@ -325,10 +309,8 @@ void keyReleased() {
 
 void mousePressed() {
 
-  // タイトル画面
   if (ui.gameState == 0) {
 
-    // ゲーム開始
     if (mouseX >= width/2-110 &&
       mouseX <= width/2+110 &&
       mouseY >= 230 &&
@@ -339,7 +321,6 @@ void mousePressed() {
       ui.showMessage("ゲームスタート！");
     }
 
-    // オプション
     else if (mouseX >= width/2-110 &&
       mouseX <= width/2+110 &&
       mouseY >= 305 &&
@@ -348,7 +329,6 @@ void mousePressed() {
       ui.gameState = 4;
     }
 
-    // 終了
     else if (mouseX >= width/2-110 &&
       mouseX <= width/2+110 &&
       mouseY >= 380 &&
@@ -358,10 +338,8 @@ void mousePressed() {
     }
   }
 
-  // オプション画面
   else if (ui.gameState == 4) {
 
-    // 難易度
     if (mouseX>=width/2+20 &&
       mouseX<=width/2+180 &&
       mouseY>=150 &&
@@ -374,7 +352,6 @@ void mousePressed() {
       }
     }
 
-    // 操作説明
     if (mouseX>=width/2-110 &&
       mouseX<=width/2+110 &&
       mouseY>=240 &&
@@ -383,7 +360,6 @@ void mousePressed() {
       ui.gameState=5;
     }
 
-    // ゲーム説明
     if (mouseX>=width/2-110 &&
       mouseX<=width/2+110 &&
       mouseY>=320 &&
@@ -392,7 +368,6 @@ void mousePressed() {
       ui.gameState=6;
     }
 
-    // タイトルへ戻る
     if (mouseX>=width/2-110 &&
       mouseX<=width/2+110 &&
       mouseY>=420 &&
@@ -402,7 +377,6 @@ void mousePressed() {
     }
   }
 
-  // GAME OVER
   else if (ui.gameState == 3) {
 
     if (mouseX >= width/2-95 &&
@@ -421,10 +395,8 @@ void mousePressed() {
     }
   }
 
-  // GAME CLEAR
   else if (ui.gameState == 2) {
 
-    // リトライ
     if (mouseX >= width/2-95 &&
       mouseX <= width/2+95 &&
       mouseY >= 240 &&
@@ -434,7 +406,6 @@ void mousePressed() {
       startSound.play();
     }
 
-    // タイトルへ戻る
     else if (mouseX >= width/2-95 &&
       mouseX <= width/2+95 &&
       mouseY >= 320 &&
