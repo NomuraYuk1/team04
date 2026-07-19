@@ -35,6 +35,13 @@ int invincTimer = 0;
 boolean isTrapped = false;
 int webEscapeCount = 0;
 
+// ★ 蜘蛛の巣脱出用の追加変数
+int webImmunityTimer = 0; 
+boolean upPressed = false;
+boolean downPressed = false;
+boolean leftPressed = false;
+boolean rightPressed = false;
+
 void setup() {
   size(800, 720);
   frameRate(60);
@@ -194,7 +201,6 @@ void initMap() {
   // 【難易度1 (HARD) のマップ】
   // ==========================================
   else if (ui.difficulty == 1) {
-    // 完全に隙間（50px以上）を確保した壁の配置
     walls.add(new Wall(130, 60, 130, 60));
     walls.add(new Wall(130, 160, 60, 80));
     walls.add(new Wall(160, 200, 60, 60));
@@ -353,17 +359,25 @@ void draw() {
           player.speed *= p.slowRate;
         }
       }
-      for (SpiderWeb web : webs) {
-        if (player.x + player.size/2 > web.x && player.x - player.size/2 < web.x + web.w &&
-          player.y + player.size/2 > web.y && player.y - player.size/2 < web.y + web.h) {
-          isTrapped = true;
+      
+      // ★ 脱出後1秒間(1000ミリ秒)は捕まらないように判定
+      if (millis() - webImmunityTimer > 1000) {
+        for (SpiderWeb web : webs) {
+          if (player.x + player.size/2 > web.x && player.x - player.size/2 < web.x + web.w &&
+            player.y + player.size/2 > web.y && player.y - player.size/2 < web.y + web.h) {
+            isTrapped = true;
+          }
         }
       }
+      
+      // ★ 蜘蛛の巣の拘束処理
       if (isTrapped) {
         player.speed = 0;
-        if (webEscapeCount >= 2) {
+        // 4回スペースキーを押せば脱出
+        if (webEscapeCount >= 4) {
           isTrapped = false;
           webEscapeCount = 0;
+          webImmunityTimer = millis(); // 脱出直後の時間を記録し、無敵時間を開始
         }
       }
     }
@@ -512,8 +526,17 @@ void keyPressed() {
   if (ui.gameState == 1) {
     player.setMove(keyCode, true);
 
+    // ★ 方向キーの押下状態を記録
+    if (keyCode == UP) upPressed = true;
+    if (keyCode == DOWN) downPressed = true;
+    if (keyCode == LEFT) leftPressed = true;
+    if (keyCode == RIGHT) rightPressed = true;
+
+    // ★ 蜘蛛の巣脱出カウント（方向キーを押している時だけカウントアップ）
     if (ui.difficulty == 1 && isTrapped && key == ' ') {
-      webEscapeCount++;
+      if (upPressed || downPressed || leftPressed || rightPressed) {
+        webEscapeCount++;
+      }
     }
   }
 }
@@ -521,6 +544,12 @@ void keyPressed() {
 void keyReleased() {
   if (ui.gameState == 1) {
     player.setMove(keyCode, false);
+    
+    // ★ 方向キーの離した状態を記録
+    if (keyCode == UP) upPressed = false;
+    if (keyCode == DOWN) downPressed = false;
+    if (keyCode == LEFT) leftPressed = false;
+    if (keyCode == RIGHT) rightPressed = false;
   }
 }
 
@@ -643,8 +672,14 @@ void restartGame() {
   barrier = 0;
   speedEffect = 1.0;
 
+  // ★ 追加変数のリセット
   isTrapped = false;
   webEscapeCount = 0;
+  webImmunityTimer = 0;
+  upPressed = false;
+  downPressed = false;
+  leftPressed = false;
+  rightPressed = false;
 
   ui.time = 120;
   ui.score = 0;
