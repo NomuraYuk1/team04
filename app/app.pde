@@ -71,22 +71,21 @@ void initEnemies() {
     // ゆっくり追尾型
     enemies.add(
       new Enemy(
-        700, 450,
-        1,
-        1.7
+      700, 450,
+      1,
+      1.7
       )
-    );
+      );
 
     // 巡回 → 近づいたら追尾
     Enemy nearChaseEnemy = new Enemy(
       400, 300,
       2,
       2.4
-    );
+      );
 
     nearChaseEnemy.chaseRange = 200;
     enemies.add(nearChaseEnemy);
-
   } else {
     // ==============================
     // HARD：敵4体
@@ -95,36 +94,36 @@ void initEnemies() {
     // 遅いランダム型
     enemies.add(
       new Enemy(
-        700, 450,
-        0,
-        1.8
+      700, 450,
+      0,
+      1.8
       )
-    );
+      );
 
     // 速いランダム型
     enemies.add(
       new Enemy(
-        400, 150,
-        0,
-        3.2
+      400, 150,
+      0,
+      3.2
       )
-    );
+      );
 
     // 常時追尾型
     enemies.add(
       new Enemy(
-        700, 250,
-        1,
-        2.5
+      700, 250,
+      1,
+      2.5
       )
-    );
+      );
 
     // 巡回 → 近づいたら追尾
     Enemy hardNearChaseEnemy = new Enemy(
       300, 350,
       2,
       2.2
-    );
+      );
 
     hardNearChaseEnemy.chaseRange = 180;
     enemies.add(hardNearChaseEnemy);
@@ -190,7 +189,7 @@ void initMap() {
     invincZones.add(new InvincibilityZone(20, 250, 60, 5000));
     invincZones.add(new InvincibilityZone(420, 140, 60, 5000));
     invincZones.add(new InvincibilityZone(600, 450, 50, 5000));
-  } 
+  }
   // ==========================================
   // 【難易度1 (HARD) のマップ】
   // ==========================================
@@ -200,21 +199,21 @@ void initMap() {
     walls.add(new Wall(130, 160, 60, 80));
     walls.add(new Wall(160, 200, 60, 60));
     walls.add(new Wall(320, 60, 100, 60));
-    walls.add(new Wall(340, 50, 60, 80));     
+    walls.add(new Wall(340, 50, 60, 80));
     walls.add(new Wall(510, 60, 110, 60));
     walls.add(new Wall(560, 120, 60, 80));
     walls.add(new Wall(670, 140, 80, 60));
-    walls.add(new Wall(680, 120, 60, 100));   
+    walls.add(new Wall(680, 120, 60, 100));
     walls.add(new Wall(650, 320, 100, 50));
     walls.add(new Wall(660, 270, 50, 60));
-    walls.add(new Wall(480, 370, 130, 50));   
+    walls.add(new Wall(480, 370, 130, 50));
     walls.add(new Wall(520, 240, 60, 80));
-    walls.add(new Wall(150, 320, 100, 50));   
+    walls.add(new Wall(150, 320, 100, 50));
     walls.add(new Wall(170, 300, 60, 90));
     walls.add(new Wall(280, 220, 80, 50));
     walls.add(new Wall(300, 260, 50, 70));
-    walls.add(new Wall(100, 470, 100, 30));   
-    walls.add(new Wall(240, 400, 60, 60));    
+    walls.add(new Wall(100, 470, 100, 30));
+    walls.add(new Wall(240, 400, 60, 60));
     walls.add(new Wall(360, 430, 80, 40));
     walls.add(new Wall(560, 460, 80, 40));
 
@@ -226,9 +225,9 @@ void initMap() {
     puddles.add(new Puddle(20, 20, 60, 40, 0.4));
     puddles.add(new Puddle(400, 180, 70, 40, 0.4));
     puddles.add(new Puddle(200, 100, 50, 50, 0.4));
-    puddles.add(new Puddle(700, 400, 80, 40, 0.4)); 
+    puddles.add(new Puddle(700, 400, 80, 40, 0.4));
 
-    webs.add(new SpiderWeb(80, 120, 40, 40, 5)); 
+    webs.add(new SpiderWeb(80, 120, 40, 40, 5));
     webs.add(new SpiderWeb(280, 330, 40, 40, 5));
     webs.add(new SpiderWeb(620, 220, 40, 40, 5));
     webs.add(new SpiderWeb(420, 280, 40, 40, 5));
@@ -241,12 +240,12 @@ void initMap() {
     webs.add(new SpiderWeb(500, 200, 40, 40, 5));
     webs.add(new SpiderWeb(100, 250, 40, 40, 5));
 
-    gates.add(new Gate(0, 200, 130, 10, 3000));   
-    gates.add(new Gate(260, 80, 60, 10, 2500));  
-    gates.add(new Gate(620, 160, 50, 10, 2000));  
-    gates.add(new Gate(580, 290, 80, 10, 3500));  
-    gates.add(new Gate(300, 440, 60, 10, 2000));  
-    gates.add(new Gate(420, 100, 90, 10, 2500));  
+    gates.add(new Gate(0, 200, 130, 10, 3000));
+    gates.add(new Gate(260, 80, 60, 10, 2500));
+    gates.add(new Gate(620, 160, 50, 10, 2000));
+    gates.add(new Gate(580, 290, 80, 10, 3500));
+    gates.add(new Gate(300, 440, 60, 10, 2000));
+    gates.add(new Gate(420, 100, 90, 10, 2500));
   }
 
   items = new ArrayList<Item>();
@@ -356,7 +355,7 @@ void draw() {
       }
       for (SpiderWeb web : webs) {
         if (player.x + player.size/2 > web.x && player.x - player.size/2 < web.x + web.w &&
-            player.y + player.size/2 > web.y && player.y - player.size/2 < web.y + web.h) {
+          player.y + player.size/2 > web.y && player.y - player.size/2 < web.y + web.h) {
           isTrapped = true;
         }
       }
@@ -386,7 +385,7 @@ void draw() {
     if (ui.difficulty == 1) {
       for (Gate g : gates) {
         if (!g.Open && player.x + pr > g.x && player.x - pr < g.x + g.w &&
-            player.y + pr > g.y && player.y - pr < g.y + g.h) {
+          player.y + pr > g.y && player.y - pr < g.y + g.h) {
           hitWall = true;
         }
       }
@@ -424,9 +423,9 @@ void draw() {
       }
     }
 
-    for (int i = effectItems.size() - 1; i >= 0; i--){
+    for (int i = effectItems.size() - 1; i >= 0; i--) {
       Item ei = effectItems.get(i);
-      if (ei.hit()){
+      if (ei.hit()) {
         ei.effect();
         effectItems.remove(i);
       }
@@ -461,24 +460,23 @@ void draw() {
     }
 
     for (Enemy enemy : enemies) {
-  enemy.move(player);
+      enemy.move(player);
 
-  if (enemy.hitPlayer(player) && !isInvincible) {
-    if (barrier > 0) {
-      barrier--;
+      if (enemy.hitPlayer(player) && !isInvincible) {
+        if (barrier > 0) {
+          barrier--;
 
-      ui.showMessage("バリアで防いだ！");
+          ui.showMessage("バリアで防いだ！");
 
-      isInvincible = true;
-      invincTimer = millis();
-
-    } else {
-      gameOverSound.play();
-      ui.gameState = 3;
-      break;
+          isInvincible = true;
+          invincTimer = millis();
+        } else {
+          gameOverSound.play();
+          ui.gameState = 3;
+          break;
+        }
+      }
     }
-  }
-}
   }
 
   player.display();
@@ -495,8 +493,8 @@ void draw() {
   }
 
   for (Enemy enemy : enemies) {
-  enemy.display();
-}
+    enemy.display();
+  }
 
   ui.display();
 }
@@ -536,21 +534,18 @@ void mousePressed() {
       restartGame();
       startSound.play();
       ui.showMessage("ゲームスタート！");
-    }
-    else if (mouseX >= width/2-110 &&
+    } else if (mouseX >= width/2-110 &&
       mouseX <= width/2+110 &&
       mouseY >= 305 &&
       mouseY <= 360) {
       ui.gameState = 4;
-    }
-    else if (mouseX >= width/2-110 &&
+    } else if (mouseX >= width/2-110 &&
       mouseX <= width/2+110 &&
       mouseY >= 380 &&
       mouseY <= 435) {
       System.exit(0);
     }
-  }
-  else if (ui.gameState == 4) {
+  } else if (ui.gameState == 4) {
     if (mouseX>=width/2+20 &&
       mouseX<=width/2+180 &&
       mouseY>=150 &&
@@ -578,8 +573,7 @@ void mousePressed() {
       mouseY<=475) {
       ui.gameState=0;
     }
-  }
-  else if (ui.gameState == 3) {
+  } else if (ui.gameState == 3) {
     if (mouseX >= width/2-95 &&
       mouseX <= width/2+95 &&
       mouseY >= 260 &&
@@ -592,16 +586,14 @@ void mousePressed() {
       mouseY <= 395) {
       ui.gameState = 0;
     }
-  }
-  else if (ui.gameState == 2) {
+  } else if (ui.gameState == 2) {
     if (mouseX >= width/2-95 &&
       mouseX <= width/2+95 &&
       mouseY >= 240 &&
       mouseY <= 295) {
       restartGame();
       startSound.play();
-    }
-    else if (mouseX >= width/2-95 &&
+    } else if (mouseX >= width/2-95 &&
       mouseX <= width/2+95 &&
       mouseY >= 320 &&
       mouseY <= width/2+375) {
@@ -615,11 +607,17 @@ void mousePressed() {
       ui.gameState = 4;
     }
   } else if (ui.gameState == 6) {
-    if (mouseX >= width/2-110 &&
-      mouseX <= width/2+110 &&
-      mouseY >= 450 &&
-      mouseY <= 505) {
-      ui.gameState = 4;
+    // 「NORMALモード」タブが押されたとき
+    if (mouseX >= width/2 - 160 && mouseX <= width/2 - 10 && mouseY >= 120 && mouseY <= 160) {
+      ui.guideMode = 0;
+    }
+    // 「HARDモード」タブが押されたとき
+    else if (mouseX >= width/2 + 10 && mouseX <= width/2 + 160 && mouseY >= 120 && mouseY <= 160) {
+      ui.guideMode = 1;
+    }
+    // 「戻る」ボタンが押されたとき（Y座標: 520 〜 575）
+    else if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 520 && mouseY <= 575) {
+      ui.gameState = 4; // オプション画面に戻る
     }
   }
 }
