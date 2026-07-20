@@ -490,6 +490,9 @@ void draw() {
           break;
         }
       }
+      if (ui.difficulty == 1 && isInvincible && millis() - invincTimer > 500) {
+        isInvincible = false;
+      }
     }
   }
 
