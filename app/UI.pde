@@ -7,6 +7,15 @@ class UI {
   int totalTreasure = 5;
   int enemyCount = 1;
 
+  // ===== パーティクル（光の粒子）用変数 =====
+  int numParticles = 25; // 粒子の数
+  float[] pX = new float[numParticles];
+  float[] pY = new float[numParticles];
+  float[] pSize = new float[numParticles];
+  float[] pSpeed = new float[numParticles];
+  float[] pAlpha = new float[numParticles];
+  boolean particlesInitialized = false; // 初期化フラグ
+
   int frameCounter = 0;
 
   String message = "ゲームスタート！";
@@ -149,50 +158,78 @@ class UI {
   }
 
   // ===== GAME OVER =====
+  // ===== GAME OVER（ダーク＆危険な雰囲気） =====
   void drawGameOver() {
 
-    // 背景
-    background(90);
+    // 1. 背景：深い闇と血の気（赤紫色）を感じさせるダークグラデーション
+    for (int i = 0; i < height; i++) {
+      float inter = map(i, 0, height, 0, 1);
+      // 上部は黒に近い闇、下部はうっすらと禍々しい赤紫
+      stroke(lerpColor(color(15, 10, 20), color(45, 15, 35), inter));
+      line(0, i, width, i);
+    }
 
     textAlign(CENTER, CENTER);
 
-    // GAME OVER
-    fill(90, 0, 130);
+    // 2. 「GAME OVER...」テキスト（影 ＋ 毒々しい紫＆赤の配色）
+    // 影（黒）
+    fill(0, 0, 0, 200);
     textSize(55);
+    text("GAME OVER...", width/2 + 3, 120 + 3);
+
+    // 本体（グラデーション風の禍々しい赤紫）
+    fill(210, 50, 100);
     text("GAME OVER...", width/2, 120);
 
-    // スコア
-    fill(255);
+    // 3. スコア表示（くっきり見える白・ゴールド系）
+    fill(0, 0, 0, 180);
     textSize(28);
+    text("スコア：" + score, width/2 + 2, 200 + 2); // 影
+
+    fill(255, 230, 180); // くっきり見えるクリームゴールド
     text("スコア：" + score, width/2, 200);
 
-    // ボタン
+    // 4. ボタン描画（配置・サイズは元のまま）
     drawGameOverButton(width/2-95, 260, 190, 55, "リトライ");
     drawGameOverButton(width/2-95, 340, 190, 55, "タイトルに戻る");
   }
 
-  // ===== GAME CLEAR =====
+  // ===== GAME CLEAR（豪華＆達成感のある雰囲気） =====
   void drawGameClear() {
 
-    background(90);
+    // 1. 背景：明るいダンジョンの奥底・光を感じるグラデーション
+    for (int i = 0; i < height; i++) {
+      float inter = map(i, 0, height, 0, 1);
+      // 深い青緑〜神聖なエメラルドグリーンへのグラデーション
+      stroke(lerpColor(color(10, 25, 20), color(20, 60, 45), inter));
+      line(0, i, width, i);
+    }
+
     textAlign(CENTER, CENTER);
 
-    fill(0, 255, 100);
+    // 2. 「GAME CLEAR!」テキスト（輝くグリーン）
+    fill(0, 0, 0, 200);
     textSize(55);
+    text("GAME CLEAR!", width/2 + 3, 120 + 3); // 影
+
+    fill(80, 255, 160); // 鮮やかなエメラルドグリーン
     text("GAME CLEAR!", width/2, 120);
 
-    fill(255);
+    // 3. スコア表示
+    fill(0, 0, 0, 180);
     textSize(28);
+    text("スコア：" + score, width/2 + 2, 200 + 2); // 影
+
+    fill(255, 240, 180);
     text("スコア：" + score, width/2, 200);
 
-    // ▼ リトライボタン追加
+    // 4. ボタン描画
     drawGameOverButton(width/2-95, 240, 190, 55, "リトライ");
-
-    // ▼ タイトルへ戻るボタン（既存）
     drawGameOverButton(width/2-95, 320, 190, 55, "タイトルに戻る");
   }
 
 
+  // ===== 強化版 リトライ／タイトルへ戻るボタン =====
   void drawGameOverButton(float x, float y, float w, float h, String label) {
 
     // マウスが乗っているか
@@ -200,20 +237,39 @@ class UI {
       mouseX >= x && mouseX <= x+w &&
       mouseY >= y && mouseY <= y+h;
 
+    // ★ボタンのドロップシャドウ
     noStroke();
+    fill(0, 0, 0, 140);
+    rect(x + 4, y + 4, w, h, 10);
 
+    // ★ホバー時と通常時のパープル・ブロンズの質感分け
     if (hover) {
-      fill(160, 20, 200);
+      fill(170, 40, 210);     // ホバー時：明るく鮮やかなネオンパープル
+      stroke(240, 180, 255); // 枠線：明るく発光する薄紫
+      strokeWeight(3);
     } else {
-      fill(140, 20, 180);
+      fill(110, 25, 140);    // 通常時：重厚なダークパープル
+      stroke(180, 100, 210); // 枠線：落ち着いた紫
+      strokeWeight(2);
     }
 
     rect(x, y, w, h, 10);
 
-    fill(255);
-    textSize(24);
+    // ★文字の装飾
     textAlign(CENTER, CENTER);
-    text(label, x+w/2, y+h/2);
+    textSize(24);
+
+    // 文字の影（視認性を爆発的に上げる）
+    fill(0, 0, 0, 180);
+    text(label, x + w/2 + 1, y + h/2 + 2);
+
+    // 文字の本体
+    if (hover) {
+      fill(255, 255, 255); // ホバー時は純白
+    } else {
+      fill(240, 220, 255); // 通常時はごく薄いパープルホワイト
+    }
+    text(label, x + w/2, y + h/2);
   }
 
   void updateTime() {
@@ -233,95 +289,156 @@ class UI {
     }
   }
 
-
+  // ===== 強化版 タイトル画面描画 =====
   void drawTitle() {
+    // 1. 背景（重厚なダークストーン風のグラデーション）
+    for (int i = 0; i < height; i++) {
+      float inter = map(i, 0, height, 0, 1);
+      // 上部は深いダークグレー、下部はほんのり茶・金混じりの暗がり
+      stroke(lerpColor(color(25, 25, 30), color(50, 40, 35), inter));
+      line(0, i, width, i);
+    }
 
-    background(90);    // 灰色
+    drawParticles();
 
     textAlign(CENTER, CENTER);
 
-    // タイトル
-    fill(255, 180, 80);
-    textAlign(CENTER, CENTER);
+    // 2. メインタイトル「迷宮の宝を探せ！」
+    // ★ドロップシャドウ（影）で立体感を出す
+    fill(20, 10, 0, 180);
     textSize(48);
+    text("迷宮の宝を探せ！", width/2 + 3, 110 + 3);
+
+    // ★本体（豪華なゴールド描画）
+    fill(255, 215, 0); // 鮮やかなゴールド
     text("迷宮の宝を探せ！", width/2, 110);
 
-    // サブタイトル
-    fill(240);
+    // 3. サブタイトル「～全ての宝を集めて脱出せよ～」
+    fill(20, 10, 0, 150);
     textSize(20);
+    text("～全ての宝を集めて脱出せよ～", width/2 + 2, 160 + 2); // 影
+
+    fill(255, 240, 180); // 薄い金・クリーム色
     text("～全ての宝を集めて脱出せよ～", width/2, 160);
 
-    // ボタン
+    // 4. ボタン描画（配置・サイズは元のまま）
     drawButton(width/2-110, 230, 220, 55, "ゲーム開始");
     drawButton(width/2-110, 305, 220, 55, "オプション");
     drawButton(width/2-110, 380, 220, 55, "ゲーム終了");
+
+    // 5. さりげない親切機能の追加（[ Enter ]キー表示）
+    fill(255, 215, 0, 180);
+    textSize(14);
+    text("Press [ ENTER ] to Quick Start", width/2, 460);
   }
 
+  // ===== 強化版 ボタン描画 =====
   void drawButton(float x, float y, float w, float h, String label) {
 
     boolean hover =
       mouseX >= x && mouseX <= x + w &&
       mouseY >= y && mouseY <= y + h;
 
+    // ★ボタンのドロップシャドウ（重厚感アップ）
+    noStroke();
+    fill(0, 0, 0, 120);
+    rect(x + 4, y + 4, w, h, 12);
+
+    // ★ホバー時の発光・通常時の質感塗り分け
     if (hover) {
-      fill(150, 80, 70);   // マウスが乗っている
+      fill(180, 100, 40);  // ホバー時：鮮やかな金ブロンズ
+      stroke(255, 235, 120); // 枠線：明るいゴールド発光
+      strokeWeight(3);
     } else {
-      fill(110, 60, 50);   // 通常
+      fill(100, 50, 35);   // 通常時：渋いアンティークブロンズ
+      stroke(180, 130, 70);  // 枠線：抑えめの真鍮色
+      strokeWeight(2);
     }
 
-    stroke(170, 120, 70);
-    strokeWeight(2);
     rect(x, y, w, h, 12);
 
-    fill(255);
+    // ★ボタン文字の装飾
     textAlign(CENTER, CENTER);
     textSize(22);
+
+    // 文字の影
+    fill(0, 0, 0, 150);
+    text(label, x + w/2 + 1, y + h/2 + 2);
+
+    // 文字の本体
+    if (hover) {
+      fill(255, 255, 220); // ホバー時は文字も明るく強調
+    } else {
+      fill(255, 220, 150); // 通常時のゴールドホワイト
+    }
     text(label, x + w/2, y + h/2);
   }
 
+  // ===== 統一デザイン版 OPTION =====
   void drawOption() {
-
-    background(70);
-
-    textAlign(CENTER);
-
-    fill(255, 200, 80);
-    textSize(42);
-    text("OPTION", width/2, 90);
-
-    fill(255);
-    textSize(24);
-
-    fill(255);
-    textSize(24);
-
-    text("難易度", width/2-120, 170);
-
-    if (difficulty==0) {
-      text("◀ NORMAL ▶", width/2+90, 170);
-    } else {
-      text("◀ HARD ▶", width/2+90, 170);
+    // 1. 背景：重厚なダークストーン風グラデーション
+    for (int i = 0; i < height; i++) {
+      float inter = map(i, 0, height, 0, 1);
+      stroke(lerpColor(color(25, 25, 30), color(50, 40, 35), inter));
+      line(0, i, width, i);
     }
 
-    drawButton(width/2-110, 240, 220, 55, "操作説明");
+    textAlign(CENTER, CENTER);
 
-    drawButton(width/2-110, 320, 220, 55, "ゲーム説明");
+    // 2. 見出し「OPTION」
+    fill(20, 10, 0, 180);
+    textSize(42);
+    text("OPTION", width/2 + 3, 90 + 3); // 影
 
-    drawButton(width/2-110, 420, 220, 55, "タイトルへ戻る");
+    fill(255, 215, 0); // ゴールド
+    text("OPTION", width/2, 90);
+
+    // 3. 難易度切り替え表示
+    textSize(24);
+    fill(0, 0, 0, 180);
+    text("難易度", width/2 - 120 + 2, 170 + 2); // 影
+    fill(255, 240, 180);
+    text("難易度", width/2 - 120, 170);
+
+    if (difficulty == 0) {
+      fill(0, 0, 0, 180);
+      text("◀ NORMAL ▶", width/2 + 90 + 2, 170 + 2);
+      fill(100, 220, 255); // NORMALカラー（水色）
+      text("◀ NORMAL ▶", width/2 + 90, 170);
+    } else {
+      fill(0, 0, 0, 180);
+      text("◀ HARD ▶", width/2 + 90 + 2, 170 + 2);
+      fill(255, 120, 255); // HARDカラー（ピンク紫）
+      text("◀ HARD ▶", width/2 + 90, 170);
+    }
+
+    // 4. ボタン描画（既存の強化版drawButtonを使用）
+    drawButton(width/2 - 110, 240, 220, 55, "操作説明");
+    drawButton(width/2 - 110, 320, 220, 55, "ゲーム説明");
+    drawButton(width/2 - 110, 420, 220, 55, "タイトルへ戻る");
   }
 
 
+  // ===== 統一デザイン版 操作説明 =====
   void drawHowToPlay() {
-    background(70);
+    // 1. 背景グラデーション
+    for (int i = 0; i < height; i++) {
+      float inter = map(i, 0, height, 0, 1);
+      stroke(lerpColor(color(25, 25, 30), color(50, 40, 35), inter));
+      line(0, i, width, i);
+    }
 
-    // タイトル
-    fill(255, 200, 80);
-    textAlign(CENTER);
+    // 2. タイトル
+    textAlign(CENTER, CENTER);
+    fill(20, 10, 0, 180);
     textSize(40);
+    text("操作説明", width/2 + 3, 80 + 3); // 影
+
+    fill(255, 215, 0);
     text("操作説明", width/2, 80);
 
-    // ─── ここから操作方法（左揃え） ───
-    textAlign(LEFT);
+    // ─── 説明文エリア（左揃え） ───
+    textAlign(LEFT, CENTER);
 
     // 1. 移動操作
     fill(255, 220, 100);
@@ -336,8 +453,7 @@ class UI {
     fill(255);
     text("：プレイヤーの移動", 360, 195);
 
-
-    // 2. 特殊操作（★見切れ対策：説明の開始位置を右にずらし、文字サイズを少し調整）
+    // 2. 特殊操作
     fill(255, 220, 100);
     textSize(24);
     text("【 特殊アクション 】", 100, 265);
@@ -346,14 +462,13 @@ class UI {
     fill(255);
     text("・", 120, 310);
     fill(100, 255, 100);
-    text("方向キー ＋ [ SPACE ]", 140, 310); // キーの名前
+    text("方向キー ＋ [ SPACE ]", 140, 310);
 
     fill(255);
-    textSize(18); // ★ここの説明文だけ少し小さくして収める
-    text("：クモの巣に捕まった時、4回連打して脱出", 380, 310); // ★開始X座標を360から380に調整
+    textSize(18);
+    text("：クモの巣に捕まった時、4回連打して脱出", 380, 310);
 
-
-    // 3. ショートカット（★見やすさのために特殊操作に文字サイズを合わせています）
+    // 3. 便利機能
     textSize(24);
     fill(255, 220, 100);
     text("【 便利機能 】", 100, 380);
@@ -361,45 +476,74 @@ class UI {
     textSize(20);
     fill(255);
     text("・", 120, 425);
-    fill(255, 255, 255);
+    fill(255);
     text("[ Enter ] キー", 140, 425);
 
     fill(255);
-    textSize(18); // ★こちらもサイズを統一
-    text("：タイトル画面で即座にゲームスタート！", 380, 425); // ★こちらも380に統一
-
+    textSize(18);
+    text("：タイトル画面で即座にゲームスタート！", 380, 425);
 
     // 戻るボタン
-    drawButton(width/2-110, 480, 220, 55, "戻る");
+    drawButton(width/2 - 110, 480, 220, 55, "戻る");
   }
 
-  void drawGameGuide() {
-    background(70);
 
-    // タイトル
-    fill(255, 200, 80);
-    textAlign(CENTER);
+  // ===== 統一デザイン版 ゲーム説明 =====
+  void drawGameGuide() {
+    // 1. 背景グラデーション
+    for (int i = 0; i < height; i++) {
+      float inter = map(i, 0, height, 0, 1);
+      stroke(lerpColor(color(25, 25, 30), color(50, 40, 35), inter));
+      line(0, i, width, i);
+    }
+
+    // 2. タイトル
+    textAlign(CENTER, CENTER);
+    fill(20, 10, 0, 180);
     textSize(40);
+    text("ゲーム説明", width/2 + 3, 80 + 3); // 影
+
+    fill(255, 215, 0);
     text("ゲーム説明", width/2, 80);
 
-    // ─── モード切り替えタブ（ボタン）の描画 ───
-    if (guideMode == 0) fill(100, 200, 255);
-    else fill(50, 100, 150);
+    // ─── モード切り替えタブ（重厚枠線＆影付き） ───
+    noStroke();
+    // タブの影
+    fill(0, 0, 0, 120);
+    rect(width/2 - 160 + 3, 120 + 3, 150, 40, 7);
+    rect(width/2 + 10 + 3, 120 + 3, 150, 40, 7);
+
+    // NORMALタブ
+    if (guideMode == 0) {
+      fill(40, 120, 180);
+      stroke(100, 220, 255);
+      strokeWeight(2);
+    } else {
+      fill(25, 50, 80);
+      noStroke();
+    }
     rect(width/2 - 160, 120, 150, 40, 7);
 
-    if (guideMode == 1) fill(255, 100, 255);
-    else fill(150, 50, 150);
+    // HARDタブ
+    if (guideMode == 1) {
+      fill(180, 40, 180);
+      stroke(255, 120, 255);
+      strokeWeight(2);
+    } else {
+      fill(80, 25, 80);
+      noStroke();
+    }
     rect(width/2 + 10, 120, 150, 40, 7);
 
-    // タブの文字入れ
+    // タブ文字
     fill(255);
     textSize(18);
-    textAlign(CENTER);
-    text("NORMALモード", width/2 - 85, 146);
-    text("HARDモード", width/2 + 85, 146);
+    textAlign(CENTER, CENTER);
+    text("NORMALモード", width/2 - 85, 138);
+    text("HARDモード", width/2 + 85, 138);
 
     // ─── 説明文の表示（左揃え） ───
-    textAlign(LEFT);
+    textAlign(LEFT, CENTER);
 
     if (guideMode == 0) {
       // ◆ NORMAL モードの説明
@@ -451,7 +595,7 @@ class UI {
       text("・ステージクリア：＋500点  ｜  残り時間ボーナス：1秒につき ＋10点", 100, 490);
     } else {
       // ◆ HARD モードの説明
-      fill(255, 100, 255);
+      fill(255, 120, 255);
       textSize(22);
       text("【HARDの特殊マップ＆追加アイテム】", 80, 200);
 
@@ -502,6 +646,46 @@ class UI {
     }
 
     // 共通の戻るボタン
-    drawButton(width/2-110, 540, 220, 55, "戻る");
+    drawButton(width/2 - 110, 540, 220, 55, "戻る");
+  }
+
+
+
+
+  // ===== パーティクルの初期化 =====
+  void initParticles() {
+    for (int i = 0; i < numParticles; i++) {
+      pX[i] = random(width);
+      pY[i] = random(height);
+      pSize[i] = random(2, 6);       // 粒子の大きさ
+      pSpeed[i] = random(0.5, 1.5);  // 上昇スピード
+      pAlpha[i] = random(100, 230);  // 透明度
+    }
+    particlesInitialized = true;
+  }
+
+  // ===== パーティクルの描画と移動 =====
+  void drawParticles() {
+    // まだ初期化されていなければ初期化する
+    if (!particlesInitialized) {
+      initParticles();
+    }
+
+    noStroke();
+    for (int i = 0; i < numParticles; i++) {
+      // 粒子を描画（あたたかみのある金の輝き）
+      fill(255, 220, 120, pAlpha[i]);
+      ellipse(pX[i], pY[i], pSize[i], pSize[i]);
+
+      // 上に向かってゆっくり移動
+      pY[i] -= pSpeed[i];
+
+      // 画面の上に消えたら、画面の下から再登場させる
+      if (pY[i] < -10) {
+        pY[i] = height + 10;
+        pX[i] = random(width);
+        pAlpha[i] = random(100, 230);
+      }
+    }
   }
 }
