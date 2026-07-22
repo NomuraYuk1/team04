@@ -36,7 +36,7 @@ boolean isTrapped = false;
 int webEscapeCount = 0;
 
 // ★ 蜘蛛の巣脱出用の追加変数
-int webImmunityTimer = 0; 
+int webImmunityTimer = 0;
 boolean upPressed = false;
 boolean downPressed = false;
 boolean leftPressed = false;
@@ -257,7 +257,7 @@ void initMap() {
   items = new ArrayList<Item>();
   int[][] itemCoords = {{100, 100}, {500, 100}, {150, 450}, {700, 450}, {400, 250}};
   for (int i = 0; i < itemCoords.length; i++) {
-    Item it = new Item();
+    Item it = new Item(4);
     it.x = itemCoords[i][0];
     it.y = itemCoords[i][1];
     items.add(it);
@@ -359,7 +359,7 @@ void draw() {
           player.speed *= p.slowRate;
         }
       }
-      
+
       // ★ 脱出後1秒間(1000ミリ秒)は捕まらないように判定
       if (millis() - webImmunityTimer > 1000) {
         for (SpiderWeb web : webs) {
@@ -369,7 +369,7 @@ void draw() {
           }
         }
       }
-      
+
       // ★ 蜘蛛の巣の拘束処理
       if (isTrapped) {
         player.speed = 0;
@@ -547,7 +547,7 @@ void keyPressed() {
 void keyReleased() {
   if (ui.gameState == 1) {
     player.setMove(keyCode, false);
-    
+
     // ★ 方向キーの離した状態を記録
     if (keyCode == UP) upPressed = false;
     if (keyCode == DOWN) downPressed = false;
@@ -635,7 +635,7 @@ void mousePressed() {
     if (mouseX >= width/2-110 &&
       mouseX <= width/2+110 &&
       mouseY >= 450 &&
-      mouseY <= 505) {
+      mouseY <= 520) {
       ui.gameState = 4;
     }
   } else if (ui.gameState == 6) {
@@ -647,8 +647,8 @@ void mousePressed() {
     else if (mouseX >= width/2 + 10 && mouseX <= width/2 + 160 && mouseY >= 120 && mouseY <= 160) {
       ui.guideMode = 1;
     }
-    // 「戻る」ボタンが押されたとき（Y座標: 520 〜 575）
-    else if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 520 && mouseY <= 575) {
+    // 「戻る」ボタンが押されたとき（Y座標: 520 〜 600）
+    else if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 520 && mouseY <= 580) {
       ui.gameState = 4; // オプション画面に戻る
     }
   }

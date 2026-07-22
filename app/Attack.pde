@@ -1,7 +1,7 @@
 class Attack extends Item {
 
   Attack() {
-    super();
+    super(0);
   }
 
   void effect() {

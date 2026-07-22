@@ -1,7 +1,7 @@
 class Move_debuff extends Item {
 
   Move_debuff() {
-    super();
+    super(3);
   }
 
   void effect() {
