@@ -417,10 +417,10 @@ void draw() {
 
         getSound.play();
         ui.treasureCount++;
-        ui.score += 100;
+        ui.score += 300;
 
         if (ui.treasureCount >= ui.totalTreasure) {
-          ui.score += 500;
+          ui.score += 1000;
           ui.score += ui.time * 10;
 
           clearSound.play();
@@ -450,7 +450,7 @@ void draw() {
         if (dist(player.x, player.y, magma.x, magma.y) < (player.size / 2) + magma.r) {
           if (!isInvincible) {
             playerHp -= magma.dmgVal;
-            ui.score -= 20;
+            ui.score -= 10;
 
             if (ui.score < 0) {
               ui.score = 0;
