@@ -1,0 +1,719 @@
+==================================================
+app1.pde
+==================================================
+Player player; // プレイヤーを操作・管理するための変数
+Enemy enemy;   // 敵を操作・管理するための変数
+UI ui;         // 画面遷移やテキスト表示を管理するための変数
+
+PFont font;    // 文字を描画する際のフォントデータを格納する変数
+
+ArrayList<Wall> walls;             // 複数の壁ブロックをまとめて管理するリスト
+ArrayList<Gate> gates;             // 複数の開閉ゲートをまとめて管理するリスト
+ArrayList<IceFloor> ices;          // 複数の氷の床をまとめて管理するリスト
+ArrayList<Magma> magmas;           // 複数のマグマをまとめて管理するリスト
+ArrayList<InvincibilityZone> invincZones; // 複数の無敵ゾーンをまとめて管理するリスト
+
+void setup() {
+  size(800, 600); // 画面の横幅を800、縦幅を600ピクセルに設定
+  frameRate(60);  // 1秒間に画面を更新する回数を60回（60FPS）に設定
+
+  font = createFont("Yu Gothic", 20); // 「游ゴシック」のサイズ20でフォントを作成
+  textFont(font);                     // 作成したフォントを現在のテキスト描画用にセット
+
+  ui = new UI(); // UIクラスのインスタンス（実体）を生成
+  
+  initMap();     // マップの壁やギミックを配置する自作関数を呼び出す
+  player = new Player(50, 50); // プレイヤーを座標(50, 50)の位置に生成
+  enemy = new Enemy(400, 300); // 敵を座標(400, 300)の位置に生成
+}
+
+void initMap() {
+  walls = new ArrayList<Wall>(); // 壁リストを新しく空の状態で初期化
+  gates = new ArrayList<Gate>(); // ゲートリストを新しく空の状態で初期化
+
+  // 以下、(x座標, y座標, 横幅, 縦幅) を指定して壁をリストに追加していく
+  walls.add(new Wall(180, 50, 40, 80));
+  walls.add(new Wall(220, 90, 40, 40));
+  walls.add(new Wall(450, 50, 40, 80));
+  walls.add(new Wall(410, 50, 40, 40));
+  walls.add(new Wall(620, 80, 40, 80));
+  walls.add(new Wall(660, 120, 40, 40));
+  walls.add(new Wall(80, 180, 40, 80));
+  walls.add(new Wall(120, 180, 40, 40));
+  walls.add(new Wall(300, 180, 40, 100));
+  walls.add(new Wall(270, 210, 100, 40));
+  walls.add(new Wall(450, 220, 40, 80));
+  walls.add(new Wall(490, 260, 40, 40));
+  walls.add(new Wall(650, 220, 40, 100));
+  walls.add(new Wall(620, 250, 100, 40));
+  walls.add(new Wall(200, 300, 40, 80));
+  walls.add(new Wall(240, 340, 40, 40));
+  walls.add(new Wall(380, 350, 100, 50));
+  walls.add(new Wall(560, 320, 40, 80));
+  walls.add(new Wall(600, 320, 40, 40));
+
+  ices = new ArrayList<IceFloor>(); // 氷の床リストを初期化
+  // (x座標, y座標, 半径, 速度倍率) を指定して追加
+  ices.add(new IceFloor(350, 100, 30, 1.5));
+  ices.add(new IceFloor(560, 250, 30, 1.5));
+  ices.add(new IceFloor(340, 330, 30, 1.5));
+
+  magmas = new ArrayList<Magma>(); // マグマリストを初期化
+  // (x座標, y座標, 半径, ダメージ量) を指定して追加
+  magmas.add(new Magma(120, 100, 30, 1));
+  magmas.add(new Magma(230, 230, 30, 1));
+  magmas.add(new Magma(550, 140, 30, 1));
+
+  invincZones = new ArrayList<InvincibilityZone>(); // 無敵ゾーンリストを初期化
+  // (x座標, y座標, サイズ, 持続時間(ミリ秒)) を指定して追加
+  invincZones.add(new InvincibilityZone(720, 20, 60, 5000));
+  invincZones.add(new InvincibilityZone(20, 250, 60, 5000));
+  invincZones.add(new InvincibilityZone(420, 140, 60, 5000));
+}
+
+void draw() {
+  background(15, 105, 135); // 背景を濃い青緑色で塗りつぶし、前のフレームを消す
+
+  if (ui.gameState == 0) {  // もしゲーム状態が0（タイトル画面）なら
+    ui.display();           // UIのタイトル画面を描画して
+    return;                 // 以下の処理は行わずにdraw()を終了する
+  }
+
+  // 壁リストの中身を1つずつ取り出して描画するループ
+  for (Wall w : walls) {
+    fill(230, 80, 230);     // 壁の内側をピンク色に設定
+    stroke(100, 0, 100);    // 壁の枠線を濃い紫に設定
+    rect(w.x, w.y, w.w, w.h); // 四角形を描画
+    noStroke();             // 枠線の設定を解除（他の図形に影響させないため）
+  }
+  
+  // 各ギミックリストの中身を取り出して、それぞれの描画メソッドを呼ぶ
+  for (IceFloor ice : ices) ice.display();
+  for (Magma magma : magmas) magma.display();
+  for (InvincibilityZone iz : invincZones) iz.display();
+
+  if (ui.gameState == 1) { // もしゲーム状態が1（プレイ中）なら
+    player.speed = player.baseSpeed; // 毎フレーム、プレイヤーの速度を一旦基本速度に戻す
+
+    // 氷の床との当たり判定
+    for (IceFloor ice : ices) {
+      if (ice.hitTest(player)) player.speed *= ice.fastRate; // 触れていたら速度を上げる
+    }
+
+    // マグマとの当たり判定
+    for (Magma magma : magmas) {
+      if (magma.hitTest(player) && !player.isInvincible) { // 触れていて、かつ無敵でないなら
+        player.hp -= magma.dmgVal;                         // HPからダメージ分を引く
+        if (player.hp <= 0) ui.gameState = 3;              // HPが0以下になったらゲームオーバー(状態3)へ
+      }
+    }
+
+    // 無敵ゾーンとの当たり判定
+    for (InvincibilityZone iz : invincZones) {
+      if (iz.hitTest(player)) {          // ゾーンに入ったら
+        player.isInvincible = true;      // プレイヤーを無敵状態にする
+        player.invincTimer = millis();   // 無敵になった瞬間の時間を記録
+      }
+    }
+
+    // 無敵状態の解除判定
+    // 無敵であり、かつ現在の時間 - 記録した時間 が 制限時間(5000ms) を超えたら
+    if (player.isInvincible && millis() - player.invincTimer > invincZones.get(0).timeLimit) {
+      player.isInvincible = false; // 無敵状態を解除
+    }
+
+    player.move(walls, gates); // プレイヤーの移動処理（壁・ゲートとの当たり判定含む）
+    enemy.move();              // 敵の移動処理
+
+    // 敵との当たり判定
+    if (enemy.hitPlayer(player) && !player.isInvincible) { // 敵に触れ、かつ無敵でないなら
+      ui.gameState = 3;                                    // ゲームオーバー(状態3)へ
+    }
+  }
+
+  // プレイヤー、敵、UI（HPやスコアなど）を画面に描画
+  player.display();
+  enemy.display();
+  ui.display();
+}
+
+void keyPressed() {
+  if (ui.gameState == 0) { // タイトル画面の時
+    if (key == ENTER || key == RETURN) { // Enterキーが押されたら
+      ui.gameState = 1;                  // プレイ画面へ移行
+      ui.showMessage("ゲームスタート！"); // 開始メッセージを表示
+    }
+    return; // 以降の処理をスキップ
+  }
+
+  if (ui.gameState == 1) { // プレイ中の時
+    player.setMove(keyCode, true); // 押された矢印キーの方向フラグをON(true)にする
+  }
+}
+
+void keyReleased() {
+  if (ui.gameState == 1) { // プレイ中の時
+    player.setMove(keyCode, false); // 離された矢印キーの方向フラグをOFF(false)にする
+  }
+}
+
+void mousePressed() {
+  if (ui.gameState == 0) { // タイトル画面の時
+    // 「ゲーム開始」ボタンの領域がクリックされたか判定
+    if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 230 && mouseY <= 285) {
+      ui.gameState = 1; // プレイ画面へ
+      ui.showMessage("ゲームスタート！");
+    // 「オプション」ボタンの領域判定
+    } else if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 305 && mouseY <= 360) {
+      ui.gameState = 4; // オプション画面へ
+    // 「ゲーム終了」ボタンの領域判定
+    } else if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 380 && mouseY <= 435) {
+      exit(); // プログラムを終了
+    }
+  } else if (ui.gameState == 4) { // オプション画面の時
+    // 「タイトルへ戻る」ボタンの判定
+    if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 420 && mouseY <= 475) {
+      ui.gameState = 0; // タイトル画面へ
+    }
+  } else if (ui.gameState == 3) { // ゲームオーバー画面の時
+    // 「リトライ」ボタンの判定
+    if (mouseX >= width/2-95 && mouseX <= width/2+95 && mouseY >= 260 && mouseY <= 315) {
+      restartGame(); // 初期化してリスタート
+    // 「タイトルへ戻る」ボタンの判定
+    } else if (mouseX >= width/2-95 && mouseX <= width/2+95 && mouseY >= 340 && mouseY <= 395) {
+      ui.gameState = 0;
+    }
+  } else if (ui.gameState == 2) { // ゲームクリア画面の時
+    // 「タイトルへ戻る」ボタンの判定
+    if (mouseX >= width/2-95 && mouseX <= width/2+95 && mouseY >= 300 && mouseY <= 355) {
+      ui.gameState = 0;
+    }
+  }
+}
+
+void restartGame() {
+  initMap();                   // マップを初期状態に戻す
+  player = new Player(50, 50); // プレイヤーを初期位置で作り直す
+  enemy = new Enemy(400, 300); // 敵を初期位置で作り直す
+  ui = new UI();               // UIをリセットする
+  ui.gameState = 1;            // プレイ画面から再開する
+}
+
+
+==================================================
+app2.pde
+==================================================
+Player player; // プレイヤー管理
+Enemy enemy;   // 敵管理
+UI ui;         // 画面状態管理
+
+PFont font;    // フォント管理
+
+ArrayList<Wall> walls;       // 壁リスト
+ArrayList<Gate> gates;       // ゲートリスト
+ArrayList<Puddle> puddles;   // 水たまりリスト
+ArrayList<SpiderWeb> webs;   // 蜘蛛の巣リスト
+
+void setup() {
+  size(800, 600); // 画面サイズ設定
+  frameRate(60);  // FPS設定
+
+  font = createFont("Yu Gothic", 20); // フォント作成
+  textFont(font);                     // フォント適用
+
+  ui = new UI(); // UI生成
+
+  initMap();                  // マップ2用の配置を初期化
+  player = new Player(40, 40); // プレイヤー初期位置
+  enemy = new Enemy(400, 300); // 敵初期位置
+}
+
+void initMap() {
+  walls = new ArrayList<Wall>(); // 壁リスト初期化
+  // 壁の配置
+  walls.add(new Wall(100, 60, 160, 60));
+  walls.add(new Wall(100, 160, 60, 100));
+  walls.add(new Wall(160, 200, 80, 60));
+  walls.add(new Wall(320, 60, 120, 60));
+  walls.add(new Wall(350, 30, 60, 120));
+  walls.add(new Wall(480, 60, 160, 60));
+  walls.add(new Wall(580, 120, 60, 100));
+  walls.add(new Wall(680, 140, 100, 60));
+  walls.add(new Wall(700, 110, 60, 120));
+  walls.add(new Wall(650, 320, 100, 60));
+  walls.add(new Wall(650, 260, 60, 60));
+  walls.add(new Wall(480, 340, 140, 60));
+  walls.add(new Wall(520, 240, 60, 100));
+  walls.add(new Wall(150, 300, 120, 60));
+  walls.add(new Wall(180, 270, 60, 120));
+  walls.add(new Wall(320, 220, 100, 60));
+  walls.add(new Wall(320, 280, 60, 80));
+
+  puddles = new ArrayList<Puddle>(); // 水たまりリスト初期化
+  // (x, y, w, h, 減速倍率)
+  puddles.add(new Puddle(650, 20, 100, 50, 0.4));
+  puddles.add(new Puddle(350, 380, 80, 40, 0.4));
+  puddles.add(new Puddle(60, 360, 90, 45, 0.4));
+
+  webs = new ArrayList<SpiderWeb>(); // 蜘蛛の巣リスト初期化
+  // (x, y, w, h, 解除に必要な連打数)
+  webs.add(new SpiderWeb(80, 140, 40, 40, 5));
+  webs.add(new SpiderWeb(280, 260, 40, 40, 5));
+  webs.add(new SpiderWeb(640, 220, 40, 40, 5));
+  webs.add(new SpiderWeb(480, 320, 40, 40, 5));
+
+  gates = new ArrayList<Gate>(); // ゲートリスト初期化
+  // (x, y, w, h, 開閉間隔ミリ秒)
+  gates.add(new Gate(0, 250, 100, 10, 3000));
+  gates.add(new Gate(260, 110, 60, 10, 2500));
+  gates.add(new Gate(640, 180, 40, 10, 2000));
+  gates.add(new Gate(580, 300, 70, 10, 3500));
+}
+
+void draw() {
+  background(100, 30, 100); // 背景を紫色で塗りつぶす
+
+  if (ui.gameState == 0) { // タイトル画面なら
+    ui.display();
+    return; // 描画して抜ける
+  }
+
+  for (Wall w : walls) w.display(); // 壁を描画
+  for (Gate g : gates) {
+    g.update(); // ゲートの開閉時間を計算
+    g.display(); // ゲートを描画
+  }
+  for (Puddle p : puddles) p.display(); // 水たまりを描画
+  for (SpiderWeb web : webs) web.display(); // 蜘蛛の巣を描画
+
+  if (ui.gameState == 1) { // プレイ中の場合
+    player.speed = player.baseSpeed; // 速度を基本に戻す
+
+    // 水たまりとの判定
+    for (Puddle p : puddles) {
+      if (p.hitTest(player)) player.speed *= p.slowRate; // 重なっていれば減速
+    }
+
+    // 蜘蛛の巣との判定
+    for (SpiderWeb web : webs) {
+      if (web.hitTest(player)) player.isTrapped = true; // 触れたらトラップ状態をtrueに
+    }
+
+    player.checkTrap(); // 連打回数が上限に達していればトラップ解除
+    player.move(walls, gates); // 移動判定と更新
+    enemy.move(); // 敵の移動更新
+
+    if (enemy.hitPlayer(player)) { // 敵との接触判定
+      ui.gameState = 3; // 触れたらゲームオーバー
+    }
+  }
+
+  player.display(); // プレイヤー描画
+  enemy.display(); // 敵描画
+  ui.display(); // UI（スコア等）描画
+}
+
+void keyPressed() {
+  if (ui.gameState == 0) { // タイトル画面の時
+    if (key == ENTER || key == RETURN) { // Enterでスタート
+      ui.gameState = 1;
+      ui.showMessage("ゲームスタート！");
+    }
+    return;
+  }
+
+  if (ui.gameState == 1) { // プレイ中の時
+    player.setMove(keyCode, true); // 矢印キー入力ON
+    
+    // 蜘蛛の巣にかかっている状態でスペースキーが押されたら
+    if (player.isTrapped && key == ' ') {
+      player.webEscapeCount++; // 連打カウンターを1増やす
+    }
+  }
+}
+
+void keyReleased() {
+  if (ui.gameState == 1) { // プレイ中の時
+    player.setMove(keyCode, false); // 矢印キー入力OFF（止まる）
+  }
+}
+
+void mousePressed() {
+  // マウスのクリック座標(mouseX, mouseY)を用いて、各ボタンの四角形エリア内か判定
+  if (ui.gameState == 0) {
+    if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 230 && mouseY <= 285) {
+      ui.gameState = 1;
+      ui.showMessage("ゲームスタート！");
+    } else if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 305 && mouseY <= 360) {
+      ui.gameState = 4;
+    } else if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 380 && mouseY <= 435) {
+      exit();
+    }
+  } else if (ui.gameState == 4) { // オプション
+    if (mouseX >= width/2-110 && mouseX <= width/2+110 && mouseY >= 420 && mouseY <= 475) {
+      ui.gameState = 0;
+    }
+  } else if (ui.gameState == 3) { // ゲームオーバー
+    if (mouseX >= width/2-95 && mouseX <= width/2+95 && mouseY >= 260 && mouseY <= 315) {
+      restartGame();
+    } else if (mouseX >= width/2-95 && mouseX <= width/2+95 && mouseY >= 340 && mouseY <= 395) {
+      ui.gameState = 0;
+    }
+  } else if (ui.gameState == 2) { // クリア
+    if (mouseX >= width/2-95 && mouseX <= width/2+95 && mouseY >= 300 && mouseY <= 355) {
+      ui.gameState = 0;
+    }
+  }
+}
+
+void restartGame() {
+  initMap();                   // マップリセット
+  player = new Player(40, 40); // プレイヤーリセット
+  enemy = new Enemy(400, 300); // 敵リセット
+  ui = new UI();               // UIリセット
+  ui.gameState = 1;            // プレイ開始
+}
+
+
+==================================================
+Player.pde
+==================================================
+class Player {
+  float x;          // プレイヤーのX座標
+  float y;          // プレイヤーのY座標
+  float size;       // プレイヤーの描画サイズ（直径）
+  float r;          // 当たり判定用の半径（sizeの半分）
+  float baseSpeed;  // 基本となる移動速度
+  float speed;      // 現在の移動速度（地形効果で変化）
+
+  boolean up;       // 上キーが押されているかのフラグ
+  boolean down;     // 下キーが押されているかのフラグ
+  boolean left;     // 左キーが押されているかのフラグ
+  boolean right;    // 右キーが押されているかのフラグ
+
+  boolean isTrapped = false;  // 蜘蛛の巣で足止めされているかの状態
+  int webEscapeCount = 0;     // 蜘蛛の巣からの脱出用スペース連打数
+  int hp = 100;               // プレイヤーの体力
+  boolean isInvincible = false; // 無敵状態かどうかのフラグ
+  int invincTimer = 0;        // 無敵になった時間を記憶するタイマー
+
+  Player(float x, float y) {
+    this.x = x;           // 初期X座標をセット
+    this.y = y;           // 初期Y座標をセット
+    this.size = 30;       // サイズを30にセット
+    this.r = this.size / 2; // 半径を15にセット
+    this.baseSpeed = 4;   // 基本速度を4にセット
+    this.speed = this.baseSpeed; // 現在速度を基本速度と同じにする
+  }
+
+  void move(ArrayList<Wall> walls, ArrayList<Gate> gates) {
+    if (!isTrapped && hp > 0) { // 足止めされておらず、HPが残っているなら移動可能
+      float vx = 0; // X方向の移動量
+      float vy = 0; // Y方向の移動量
+
+      // 入力フラグに基づいて移動量を決める
+      if (up) vy -= speed;
+      if (down) vy += speed;
+      if (left) vx -= speed;
+      if (right) vx += speed;
+
+      // X方向の壁・ゲート衝突判定
+      boolean canMoveX = true; // X方向へ移動できるかのフラグ
+      for (Wall w : walls) {
+        if (checkCollision(x + vx, y, w)) canMoveX = false; // 移動先に壁があれば移動不可に
+      }
+      for (Gate g : gates) {
+        // ゲートが閉まっていて(!g.Open)、かつ移動先に重なるなら移動不可に
+        if (!g.Open && checkGateCollision(x + vx, y, g)) canMoveX = false;
+      }
+      if (canMoveX) x += vx; // 移動可能ならX座標を更新
+
+      // Y方向の壁・ゲート衝突判定
+      boolean canMoveY = true; // Y方向へ移動できるかのフラグ
+      for (Wall w : walls) {
+        if (checkCollision(x, y + vy, w)) canMoveY = false; // 移動先に壁があれば移動不可に
+      }
+      for (Gate g : gates) {
+        // ゲートが閉まっていて(!g.Open)、かつ移動先に重なるなら移動不可に
+        if (!g.Open && checkGateCollision(x, y + vy, g)) canMoveY = false;
+      }
+      if (canMoveY) y += vy; // 移動可能ならY座標を更新
+
+      // 画面の端から外に出ないように、XとYの座標を画面サイズ内に制限する
+      x = constrain(x, size / 2, width - size / 2);
+      y = constrain(y, size / 2, height - size / 2);
+    }
+  }
+
+  // 壁との当たり判定（矩形と円の簡易判定）
+  boolean checkCollision(float nextX, float nextY, Wall w) {
+    // プレイヤーの円の端が壁の四角形の中に食い込んでいるかを計算
+    return (nextX + r > w.x && nextX - r < w.x + w.w && 
+            nextY + r > w.y && nextY - r < w.y + w.h);
+  }
+
+  // ゲートとの当たり判定（壁と同じ計算）
+  boolean checkGateCollision(float nextX, float nextY, Gate g) {
+    return (nextX + r > g.x && nextX - r < g.x + g.w && 
+            nextY + r > g.y && nextY - r < g.y + g.h);
+  }
+
+  // 蜘蛛の巣の解除判定
+  void checkTrap() {
+    if (webEscapeCount >= 5) { // スペースキーが5回以上押されたら
+      isTrapped = false;       // 足止めを解除
+      webEscapeCount = 0;      // カウンターをリセット
+    }
+  }
+
+  void display() {
+    if (hp <= 0) {
+      fill(50); // 死亡時は暗いグレーに
+    } else if (isInvincible) {
+      fill(255); // 無敵時は白に
+    } else {
+      fill(0, 120, 255); // 通常時は青に
+    }
+    ellipse(x, y, size, size); // プレイヤー本体を描画
+    
+    // 足止め状態の時は赤いエフェクトを重ねて描画する
+    if (isTrapped) {
+      fill(255, 0, 0, 100); // 赤色の半透明
+      ellipse(x, y, size + 10, size + 10); // 一回り大きく描画
+    }
+  }
+
+  // キーボードの入力状態をフラグ変数に反映させる
+  void setMove(int keyCode, boolean isPressed) {
+    if (keyCode == UP) up = isPressed;       // 上キー
+    if (keyCode == DOWN) down = isPressed;   // 下キー
+    if (keyCode == LEFT) left = isPressed;   // 左キー
+    if (keyCode == RIGHT) right = isPressed; // 右キー
+  }
+}
+
+
+==================================================
+Wall.pde
+==================================================
+class Wall {
+  float x, y, w, h; // 壁の左上X座標、左上Y座標、幅、高さを保持
+
+  Wall(float startX, float startY, float wallW, float wallH) {
+    x = startX; // 引数を変数に代入
+    y = startY;
+    w = wallW;
+    h = wallH;
+  }
+
+1.map1
+ void display() {
+    fill(255, 255, 0); 　// 塗りつぶしを黄色に設定
+    stroke(200, 200, 0);
+    rect(x, y, w, h);　　// 指定された座標とサイズで四角形を描画
+    noStroke();　　　　　// 他の描画に枠線が引き継がれないように解除
+  }
+}
+
+2.map2
+  void display() {
+    fill(150);        // 塗りつぶしをグレーに設定
+    stroke(100);      // 枠線を少し濃いグレーに設定
+    rect(x, y, w, h); // 指定された座標とサイズで四角形を描画
+    noStroke();       // 他の描画に枠線が引き継がれないように解除
+  }
+}
+
+
+==================================================
+Gate.pde
+==================================================
+class Gate {
+  float x, y, w, h;       // ゲートの左上X座標、左上Y座標、幅、高さ
+  boolean Open;           // 開閉状態（true:開, false:閉）
+  int intervalTime;       // 切り替わる時間間隔（ミリ秒）
+  int lastSwitchTime;     // 最後に切り替わった時刻
+
+  Gate(float startX, float startY, float gateW, float gateH, int interval) {
+    x = startX;
+    y = startY;
+    w = gateW;
+    h = gateH;
+    intervalTime = interval; // 引数の間隔をセット
+    Open = true;             // 最初は開いた状態にする
+    lastSwitchTime = 0;      // 最終切り替え時刻を0で初期化
+  }
+
+  void update() {
+    // 現在時刻(millis)から前回切り替わった時間を引いた値が間隔を超えたら
+    if (millis() - lastSwitchTime > intervalTime) {
+      Open = !Open;              // true/falseを反転（開閉切り替え）
+      lastSwitchTime = millis(); // 切り替わった時間を現在の時刻に更新
+    }
+  }
+
+  void display() {
+    if (Open) {
+      fill(0, 255, 0, 150); // 開いている時は半透明の緑色
+    } else {
+      fill(255, 0, 0);      // 閉まっている時は不透明の赤色
+    }
+    rect(x, y, w, h);       // 四角形を描画
+  }
+
+  // 外部からゲートが通れる状態か（開いているか）を確認する用
+  boolean Passable() {
+    return Open;
+  }
+}
+
+
+==================================================
+IceFloor.pde
+==================================================
+class IceFloor {
+  float x, y, r;   // 氷の床の中心X、中心Y、半径
+  float fastRate;  // 移動速度をどれくらい上げるかの倍率
+
+  IceFloor(float startX, float startY, float radius, float rate) {
+    x = startX;
+    y = startY;
+    r = radius;
+    fastRate = rate; // 速度倍率をセット
+  }
+
+  void display() {
+    fill(180, 210, 255);       // 水色に設定
+    ellipse(x, y, r * 2, r * 2); // 半径の2倍（直径）で円を描画
+  }
+
+  // プレイヤーが氷の上にいるかの判定
+  boolean hitTest(Player p) {
+    // dist関数でプレイヤーと氷の中心距離を計算し、お互いの半径の合計より小さければ重なっている
+    return (dist(p.x, p.y, x, y) < r + p.r);
+  }
+}
+
+
+==================================================
+Magma.pde
+==================================================
+class Magma {
+  float x, y, r; // マグマの中心X、中心Y、半径
+  int dmgVal;    // 触れた際に受けるダメージ量
+
+  Magma(float startX, float startY, float radius, int dmg) {
+    x = startX;
+    y = startY;
+    r = radius;
+    dmgVal = dmg; // ダメージ量をセット
+  }
+
+  void display() {
+    fill(255, 0, 0);           // 赤色に設定
+    ellipse(x, y, r * 2, r * 2); // 半径の2倍（直径）で円を描画
+  }
+
+  // プレイヤーがマグマの上にいるかの判定
+  boolean hitTest(Player p) {
+    // dist関数で中心距離を計算し、半径の合計値と比較して接触を判定
+    return (dist(p.x, p.y, x, y) < r + p.r);
+  }
+}
+
+
+==================================================
+InvincibilityZone.pde
+==================================================
+class InvincibilityZone {
+  float x, y, w, h; // ゾーンの左上X、左上Y、幅、高さ
+  int timeLimit;    // 無敵効果の持続時間（ミリ秒）
+
+  InvincibilityZone(float startX, float startY, float size, int limit) {
+    x = startX;
+    y = startY;
+    w = size;       // 正方形にするため幅にsizeをセット
+    h = size;       // 高さにもsizeをセット
+    timeLimit = limit; // 持続時間をセット
+  }
+
+  void display() {
+    fill(255);        // 白色に設定
+    rect(x, y, w, h); // 四角形を描画
+  }
+
+  // プレイヤーがゾーン内に入ったかの判定
+  boolean hitTest(Player p) {
+    // プレイヤーの円の端が、無敵ゾーンの四角形エリアに重なっているかを計算
+    return (p.x + p.r > x && p.x - p.r < x + w && p.y + p.r > y && p.y - p.r < y + h);
+  }
+}
+
+
+==================================================
+Puddle.pde
+==================================================
+class Puddle {
+  float x, y, w, h; // 水たまりを配置する矩形の左上X、左上Y、幅、高さ
+  float slowRate;   // 移動速度をどれくらい下げるかの倍率
+
+  Puddle(float startX, float startY, float puddleW, float puddleH, float rate) {
+    x = startX;
+    y = startY;
+    w = puddleW;
+    h = puddleH;
+    slowRate = rate; // 減速倍率をセット
+  }
+
+  void display() {
+    fill(10, 80, 120); // 濃い青色（水色）に設定
+    // 座標(x,y)は左上のため、楕円の中心にするため幅と高さの半分を足して描画
+    ellipse(x + w/2, y + h/2, w, h); 
+  }
+
+  // プレイヤーが水たまりの上にいるかの判定
+  boolean hitTest(Player p) {
+    // プレイヤーの円の端が、水たまりの配置矩形領域に重なっているかを計算
+    return (p.x > x && p.x < x + w && p.y > y && p.y < y + h);
+  }
+}
+
+
+==================================================
+SpiderWeb.pde
+==================================================
+class SpiderWeb {
+  float x, y, w, h; // 蜘蛛の巣を配置する矩形の左上X、左上Y、幅、高さ
+  int requiredTaps; // 解除に必要なキー連打数
+
+  SpiderWeb(float startX, float startY, float webW, float webH, int taps) {
+    x = startX;
+    y = startY;
+    w = webW;
+    h = webH;
+    requiredTaps = taps; // 連打数をセット
+  }
+
+  void display() {
+    stroke(255); // 線の色を白に設定
+    
+    // 蜘蛛の巣の骨組みとなる4本の直線を引く
+    line(x, y, x + w, y + h);             // 左上から右下への斜め線
+    line(x + w, y, x, y + h);             // 右上から左下への斜め線
+    line(x + w/2, y, x + w/2, y + h);     // 縦の直線
+    line(x, y + h/2, x + w, y + h/2);     // 横の直線
+    
+    noFill(); // 中を塗りつぶさない設定にする
+    // 蜘蛛の巣の網目となる2つの円を描画する
+    ellipse(x + w/2, y + h/2, w/2, h/2);  // 内側の小さい円
+    ellipse(x + w/2, y + h/2, w, h);      // 外側の大きい円
+    
+    noStroke(); // 他の描画に線の設定が影響しないよう解除する
+  }
+
+  // プレイヤーが蜘蛛の巣に触れたかの判定
+  boolean hitTest(Player p) {
+    // プレイヤーの円の端が、蜘蛛の巣の矩形領域に重なっているかを計算
+    return (p.x + p.r > x && p.x - p.r < x + w && p.y + p.r > y && p.y - p.r < y + h);
+  }
+}
