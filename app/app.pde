@@ -76,21 +76,10 @@ void initEnemies() {
     // ==============================
 
     // ゆっくり追尾型
-    enemies.add(
-      new Enemy(
-      700, 450,
-      1,
-      1.7
-      )
-      );
+    enemies.add(new Enemy(700, 450, 1, 1.7));
 
     // 巡回 → 近づいたら追尾
-    Enemy nearChaseEnemy = new Enemy(
-      400, 300,
-      2,
-      2.4
-      );
-
+    Enemy nearChaseEnemy = new Enemy(400, 300, 2, 2.4);
     nearChaseEnemy.chaseRange = 200;
     enemies.add(nearChaseEnemy);
   } else {
@@ -99,39 +88,16 @@ void initEnemies() {
     // ==============================
 
     // 遅いランダム型
-    enemies.add(
-      new Enemy(
-      700, 450,
-      0,
-      1.8
-      )
-      );
+    enemies.add(new Enemy(700, 450, 0, 1.8));
 
     // 速いランダム型
-    enemies.add(
-      new Enemy(
-      400, 150,
-      0,
-      3.2
-      )
-      );
+    enemies.add(new Enemy(400, 150, 0, 3.2));
 
     // 常時追尾型
-    enemies.add(
-      new Enemy(
-      700, 250,
-      1,
-      2.5
-      )
-      );
+    enemies.add(new Enemy(700, 250, 1, 2.5));
 
     // 巡回 → 近づいたら追尾
-    Enemy hardNearChaseEnemy = new Enemy(
-      300, 350,
-      2,
-      2.2
-      );
-
+    Enemy hardNearChaseEnemy = new Enemy(300, 350, 2, 2.2);
     hardNearChaseEnemy.chaseRange = 180;
     enemies.add(hardNearChaseEnemy);
   }
